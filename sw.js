@@ -1,9 +1,15 @@
-// FINANKU Service Worker v1.2
-const CACHE_NAME = 'finanku-v1.2';
+// FINANKU Service Worker v1.3
+const CACHE_NAME = 'finanku-v1.3';
 const STATIC_ASSETS = [
   './index.html',
   './manifest.json',
   './icon.svg',
+  './favicon.ico',
+  './favicon-32x32.png',
+  './favicon-16x16.png',
+  './apple-touch-icon.png',
+  './icon-192x192.png',
+  './icon-512x512.png',
 ];
 const CDN_ASSETS = [
   'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap',
