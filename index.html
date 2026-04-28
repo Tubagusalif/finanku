@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>FINANKU - Kelola Keuangan</title>
+
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="manifest.json">
+
+  <!-- Theme & Status Bar -->
+  <meta name="theme-color" content="#6c63ff">
+  <meta name="msapplication-TileColor" content="#6c63ff">
+  <meta name="msapplication-navbutton-color" content="#6c63ff">
+
+  <!-- iOS PWA Support -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="FINANKU">
+  <link rel="apple-touch-icon" href="icon.svg">
+  <link rel="apple-touch-startup-image" href="icon.svg">
+
+  <!-- SEO & Share -->
+  <meta name="description" content="Aplikasi pencatat keuangan pribadi — catat pemasukan, pengeluaran, dan lihat statistik keuangan Anda.">
+  <meta name="mobile-web-app-capable" content="yes">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --bg:#0f1117;--bg2:#1a1d27;--bg3:#22263a;--bg4:#2a2f45;
+    --accent:#6c63ff;--accent2:#a78bfa;--accent3:#34d399;--danger:#f87171;--warn:#fbbf24;
+    --text:#e8eaf6;--text2:#9ca3c4;--text3:#6b7599;
+    --border:rgba(108,99,255,0.18);--border2:rgba(255,255,255,0.07);
+    --font:'Plus Jakarta Sans',sans-serif;--mono:'DM Mono',monospace;
+    --r:12px;--r2:8px;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  html{height:100%;-webkit-tap-highlight-color:transparent}
+  body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh;min-height:100dvh;font-size:14px;-webkit-font-smoothing:antialiased}
+  .screen{display:none;min-height:100vh;min-height:100dvh}
+  .screen.active{display:flex}
+  input,select,textarea{background:var(--bg3);border:1px solid var(--border);color:var(--text);border-radius:var(--r2);padding:10px 14px;font-family:var(--font);font-size:14px;width:100%;outline:none;transition:border .2s}
+  input:focus,select:focus{border-color:var(--accent)}
+  select option{background:var(--bg3)}
+  button{cursor:pointer;font-family:var(--font);font-size:14px;border:none;transition:all .15s;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+  .btn-primary{background:var(--accent);color:#fff;border-radius:var(--r2);padding:11px 20px;font-weight:600}
+  .btn-primary:hover{background:#5a52e0;transform:translateY(-1px)}
+  .btn-primary:active{transform:translateY(0);background:#4a43d0}
+  .btn-danger{background:var(--danger);color:#fff;border-radius:var(--r2);padding:8px 14px;font-weight:500}
+  .btn-danger:hover{background:#ef4444}
+  .btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border2);border-radius:var(--r2);padding:8px 14px}
+  .btn-ghost:hover{background:var(--bg3);color:var(--text)}
+  .btn-success{background:var(--accent3);color:#0d1f16;border-radius:var(--r2);padding:8px 14px;font-weight:600}
+  .card{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r)}
+  .tag-income{background:rgba(52,211,153,0.13);color:var(--accent3);padding:3px 10px;border-radius:20px;font-size:12px;font-weight:500}
+  .tag-expense{background:rgba(248,113,113,0.13);color:var(--danger);padding:3px 10px;border-radius:20px;font-size:12px;font-weight:500}
+  .scrollbar::-webkit-scrollbar{width:5px}
+  .scrollbar::-webkit-scrollbar-track{background:var(--bg2)}
+  .scrollbar::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:3px}
+  .toast{position:fixed;bottom:calc(24px + var(--safe-bottom));right:24px;background:var(--accent);color:#fff;padding:12px 20px;border-radius:var(--r2);font-size:14px;font-weight:500;z-index:9999;opacity:0;transform:translateY(10px);transition:all .3s;pointer-events:none;max-width:calc(100vw - 48px)}
+  .toast.show{opacity:1;transform:translateY(0)}
+  .toast.error{background:var(--danger)}
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:100;align-items:center;justify-content:center;padding:16px}
+  .modal-overlay.open{display:flex}
+  .modal{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:28px;width:min(440px,95vw);max-height:90vh;overflow-y:auto}
+
+  /* Install Banner */
+  #installBanner{
+    position:fixed;bottom:0;left:0;right:0;
+    background:linear-gradient(135deg,var(--accent),var(--accent2));
+    padding:16px 20px calc(16px + var(--safe-bottom));
+    display:flex;align-items:center;justify-content:space-between;
+    z-index:200;transform:translateY(100%);transition:transform .4s cubic-bezier(.34,1.56,.64,1);
+    gap:12px;
+  }
+  #installBanner.show{transform:translateY(0)}
+  #installBanner p{font-size:13px;font-weight:500;color:#fff;flex:1}
+  #installBanner small{display:block;color:rgba(255,255,255,0.75);font-size:11px;margin-top:2px}
+  .install-btn{background:rgba(255,255,255,0.2);color:#fff;border:1px solid rgba(255,255,255,0.35);border-radius:8px;padding:8px 16px;font-size:13px;font-weight:600;white-space:nowrap;flex-shrink:0}
+  .install-dismiss{background:transparent;border:none;color:rgba(255,255,255,0.7);font-size:20px;padding:4px;flex-shrink:0;line-height:1}
+
+  /* Mobile Bottom Nav */
+  #bottomNav{
+    display:none;
+    position:fixed;bottom:0;left:0;right:0;
+    background:var(--bg2);border-top:1px solid var(--border2);
+    padding:8px 0 calc(8px + var(--safe-bottom));
+    z-index:50;
+  }
+  .bottom-nav-inner{display:flex;justify-content:space-around;align-items:center}
+  .bnav-btn{display:flex;flex-direction:column;align-items:center;gap:3px;background:transparent;border:none;color:var(--text3);padding:6px 16px;border-radius:var(--r2);transition:color .15s;font-size:10px;font-weight:500;min-width:64px}
+  .bnav-btn.active{color:var(--accent)}
+  .bnav-btn svg{width:22px;height:22px;transition:transform .15s}
+  .bnav-btn.active svg{transform:scale(1.1)}
+
+  /* Responsive */
+  @media(max-width:640px){
+    #topNav{display:none!important}
+    #bottomNav{display:block}
+    #mainContent{padding:16px 14px calc(90px + var(--safe-bottom))}
+    #tab-dashboard > div:first-child{flex-direction:column;align-items:flex-start}
+    .dashboard-grid{grid-template-columns:1fr 1fr!important}
+    .main-content-cols{grid-template-columns:1fr!important}
+    .stats-grid{grid-template-columns:1fr!important}
+  }
+  @media(min-width:641px){
+    #topNav{display:flex!important}
+    #bottomNav{display:none!important}
+  }
+
+  /* Animations */
+  @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+  .tab-content{animation:fadeIn .2s ease}
+
+  /* PWA standalone adjustments */
+  @media(display-mode:standalone){
+    #loginScreen{padding-top:calc(20px + var(--safe-top))}
+    #topNav{padding-top:var(--safe-top);height:calc(56px + var(--safe-top))}
+  }
+
+  /* Loading spinner */
+  #appLoader{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:1000;flex-direction:column;gap:16px;transition:opacity .4s}
+  #appLoader.hidden{opacity:0;pointer-events:none}
+  .spinner{width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+
+<!-- LOADER -->
+<div id="appLoader">
+  <div style="width:52px;height:52px;background:var(--accent);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px">💰</div>
+  <div class="spinner"></div>
+  <p style="color:var(--text2);font-size:13px">Memuat FINANKU...</p>
+</div>
+
+<!-- LOGIN SCREEN -->
+<div id="loginScreen" class="screen active" style="flex-direction:column;align-items:center;justify-content:center;padding:20px;background:radial-gradient(ellipse at 50% 0%,rgba(108,99,255,0.12) 0%,transparent 65%),var(--bg)">
+  <div style="width:min(380px,100%);text-align:center">
+    <div style="width:64px;height:64px;background:var(--accent);border-radius:18px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:28px;box-shadow:0 8px 32px rgba(108,99,255,0.4)">💰</div>
+    <h1 style="font-size:28px;font-weight:700;letter-spacing:-0.5px;margin-bottom:4px">FINANKU</h1>
+    <p style="color:var(--text2);margin-bottom:32px;font-size:13px">Kelola keuangan Anda dengan cerdas</p>
+    <div class="card" style="padding:28px;text-align:left">
+      <p style="font-weight:600;margin-bottom:20px;font-size:16px">Masuk ke akun Anda</p>
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div>
+          <label style="font-size:12px;color:var(--text2);margin-bottom:6px;display:block">Nama Pengguna</label>
+          <input type="text" id="loginUser" placeholder="Masukkan nama pengguna" autocomplete="username" inputmode="text">
+        </div>
+        <div>
+          <label style="font-size:12px;color:var(--text2);margin-bottom:6px;display:block">Kata Sandi</label>
+          <input type="password" id="loginPass" placeholder="Masukkan kata sandi" autocomplete="current-password">
+        </div>
+        <button class="btn-primary" onclick="doLogin()" style="margin-top:4px;width:100%;padding:13px 20px;font-size:15px">Masuk</button>
+      </div>
+      <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border2);text-align:center">
+        <p style="color:var(--text2);font-size:12px;margin-bottom:10px">Belum punya akun?</p>
+        <button class="btn-ghost" onclick="showRegister()" style="width:100%;font-size:13px">Daftar Akun Baru</button>
+      </div>
+    </div>
+    <p style="margin-top:16px;color:var(--text3);font-size:11px">🔒 Data tersimpan aman di perangkat Anda</p>
+
+    <!-- iOS Install Hint -->
+    <div id="iosHint" style="display:none;margin-top:16px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);padding:14px;text-align:left">
+      <p style="font-size:12px;font-weight:600;margin-bottom:6px;color:var(--accent2)">📲 Install ke Home Screen (iOS)</p>
+      <p style="font-size:11px;color:var(--text2);line-height:1.6">Ketuk tombol <strong style="color:var(--text)">Share</strong> di Safari → pilih <strong style="color:var(--text)">"Add to Home Screen"</strong> → ketuk <strong style="color:var(--text)">Add</strong>. App akan muncul di layar utama!</p>
+    </div>
+  </div>
+</div>
+
+<!-- REGISTER MODAL -->
+<div id="registerModal" class="modal-overlay">
+  <div class="modal">
+    <h2 style="font-size:18px;font-weight:600;margin-bottom:20px">Buat Akun Baru</h2>
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div>
+        <label style="font-size:12px;color:var(--text2);margin-bottom:6px;display:block">Nama Lengkap</label>
+        <input type="text" id="regName" placeholder="Nama lengkap Anda" autocomplete="name">
+      </div>
+      <div>
+        <label style="font-size:12px;color:var(--text2);margin-bottom:6px;display:block">Nama Pengguna</label>
+        <input type="text" id="regUser" placeholder="Buat nama pengguna" autocomplete="username">
+      </div>
+      <div>
+        <label style="font-size:12px;color:var(--text2);margin-bottom:6px;display:block">Kata Sandi</label>
+        <input type="password" id="regPass" placeholder="Buat kata sandi (min. 4 karakter)" autocomplete="new-password">
+      </div>
+      <div style="display:flex;gap:10px;margin-top:4px">
+        <button class="btn-ghost" onclick="closeRegister()" style="flex:1">Batal</button>
+        <button class="btn-primary" onclick="doRegister()" style="flex:2">Daftar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN APP SCREEN -->
+<div id="appScreen" class="screen" style="flex-direction:column">
+
+  <!-- TOP NAV (Desktop) -->
+  <nav id="topNav" style="background:var(--bg2);border-bottom:1px solid var(--border2);padding:0 20px;display:flex;align-items:center;justify-content:space-between;height:56px;position:sticky;top:0;z-index:50">
+    <div style="display:flex;align-items:center;gap:10px">
+      <div style="width:32px;height:32px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px">💰</div>
+      <span style="font-weight:700;font-size:16px;letter-spacing:-0.3px">FINANKU</span>
+    </div>
+    <div style="display:flex;gap:4px">
+      <button class="nav-btn btn-ghost" data-tab="dashboard" onclick="switchTab('dashboard')" style="font-size:13px;padding:6px 14px">Dashboard</button>
+      <button class="nav-btn btn-ghost" data-tab="transactions" onclick="switchTab('transactions')" style="font-size:13px;padding:6px 14px">Transaksi</button>
+      <button class="nav-btn btn-ghost" data-tab="stats" onclick="switchTab('stats')" style="font-size:13px;padding:6px 14px">Statistik</button>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <div id="userBadge" style="font-size:13px;color:var(--text2)"></div>
+      <button onclick="doLogout()" style="background:rgba(248,113,113,0.1);color:var(--danger);border:1px solid rgba(248,113,113,0.2);border-radius:var(--r2);padding:6px 12px;font-size:12px;cursor:pointer">Keluar</button>
+    </div>
+  </nav>
+
+  <!-- BOTTOM NAV (Mobile) -->
+  <div id="bottomNav">
+    <div class="bottom-nav-inner">
+      <button class="bnav-btn active" data-tab="dashboard" onclick="switchTab('dashboard')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+          <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+        </svg>
+        Dashboard
+      </button>
+      <button class="bnav-btn" data-tab="add" onclick="switchTab('add')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+          <circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/>
+        </svg>
+        Tambah
+      </button>
+      <button class="bnav-btn" data-tab="transactions" onclick="switchTab('transactions')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/>
+          <line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/>
+          <line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+        </svg>
+        Transaksi
+      </button>
+      <button class="bnav-btn" data-tab="stats" onclick="switchTab('stats')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/>
+          <line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/>
+        </svg>
+        Statistik
+      </button>
+    </div>
+  </div>
+
+  <!-- CONTENT AREA -->
+  <div id="mainContent" style="flex:1;overflow:auto;padding:20px" class="scrollbar">
+
+    <!-- DASHBOARD TAB -->
+    <div id="tab-dashboard" class="tab-content">
+      <div style="margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+        <div>
+          <h2 style="font-size:20px;font-weight:700">Dashboard</h2>
+          <p id="greetUser" style="color:var(--text2);font-size:13px;margin-top:2px"></p>
+        </div>
+        <button class="btn-success" onclick="exportXLSX()" style="display:flex;align-items:center;gap:6px;font-size:13px">
+          <span>⬇</span> Ekspor .xlsx
+        </button>
+      </div>
+
+      <!-- SUMMARY CARDS -->
+      <div class="dashboard-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:20px">
+        <div class="card" style="padding:16px;border-left:3px solid var(--accent3)">
+          <p style="font-size:11px;color:var(--text2);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px">Total Pemasukan</p>
+          <p id="totalIncome" style="font-size:22px;font-weight:700;font-family:var(--mono);color:var(--accent3)">Rp 0</p>
+        </div>
+        <div class="card" style="padding:16px;border-left:3px solid var(--danger)">
+          <p style="font-size:11px;color:var(--text2);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px">Total Pengeluaran</p>
+          <p id="totalExpense" style="font-size:22px;font-weight:700;font-family:var(--mono);color:var(--danger)">Rp 0</p>
+        </div>
+        <div class="card" style="padding:16px;border-left:3px solid var(--accent)">
+          <p style="font-size:11px;color:var(--text2);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px">Saldo Bersih</p>
+          <p id="netBalance" style="font-size:22px;font-weight:700;font-family:var(--mono);color:var(--accent)">Rp 0</p>
+        </div>
+        <div class="card" style="padding:16px;border-left:3px solid var(--warn)">
+          <p style="font-size:11px;color:var(--text2);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px">Jumlah Transaksi</p>
+          <p id="totalTrx" style="font-size:22px;font-weight:700;font-family:var(--mono);color:var(--warn)">0</p>
+        </div>
+      </div>
+
+      <!-- QUICK ADD + RECENT -->
+      <div class="main-content-cols" style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div class="card" style="padding:20px">
+          <p style="font-weight:600;margin-bottom:16px;font-size:15px">Tambah Transaksi</p>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div>
+              <label style="font-size:12px;color:var(--text2);margin-bottom:5px;display:block">Jenis</label>
+              <select id="qType">
+                <option value="income">Pemasukan</option>
+                <option value="expense">Pengeluaran</option>
+              </select>
+            </div>
+            <div>
+              <label style="font-size:12px;color:var(--text2);margin-bottom:5px;display:block">Keterangan</label>
+              <input type="text" id="qDesc" placeholder="Contoh: Gaji, Makan, dll">
+            </div>
+            <div>
+              <label style="font-size:12px;color:var(--text2);margin-bottom:5px;display:block">Jumlah (Rp)</label>
+              <input type="number" id="qAmount" placeholder="0" min="0" inputmode="numeric">
+            </div>
+            <div>
+              <label style="font-size:12px;color:var(--text2);margin-bottom:5px;display:block">Kategori</label>
+              <select id="qCat">
+                <option value="Gaji">Gaji</option>
+                <option value="Bisnis">Bisnis</option>
+                <option value="Investasi">Investasi</option>
+                <option value="Makanan">Makanan</option>
+                <option value="Transport">Transport</option>
+                <option value="Belanja">Belanja</option>
+                <option value="Tagihan">Tagihan</option>
+                <option value="Kesehatan">Kesehatan</option>
+                <option value="Hiburan">Hiburan</option>
+                <option value="Lainnya">Lainnya</option>
+              </select>
+            </div>
+            <div>
+              <label style="font-size:12px;color:var(--text2);margin-bottom:5px;display:block">Tanggal</label>
+              <input type="date" id="qDate">
+            </div>
+            <button class="btn-primary" onclick="addTransaction()">+ Tambah Transaksi</button>
+          </div>
+        </div>
+
+        <div class="card" style="padding:20px">
+          <p style="font-weight:600;margin-bottom:16px;font-size:15px">Transaksi Terbaru</p>
+          <div id="recentList" style="display:flex;flex-direction:column;gap:8px;max-height:360px;overflow-y:auto" class="scrollbar"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ADD TAB (Mobile only) -->
+    <div id="tab-add" class="tab-content" style="display:none">
+      <div style="margin-bottom:20px">
+        <h2 style="font-size:20px;font-weight:700">Tambah Transaksi</h2>
+        <p style="color:var(--text2);font-size:13px;margin-top:2px">Catat pemasukan atau pengeluaran</p>
+      </div>
+      <div class="card" style="padding:20px">
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <button id="addTypeIncome" onclick="setAddType('income')" style="background:rgba(52,211,153,0.15);color:var(--accent3);border:2px solid var(--accent3);border-radius:var(--r2);padding:12px;font-weight:600;font-size:13px">
+              ↑ Pemasukan
+            </button>
+            <button id="addTypeExpense" onclick="setAddType('expense')" style="background:var(--bg3);color:var(--text2);border:2px solid var(--border2);border-radius:var(--r2);padding:12px;font-weight:600;font-size:13px">
+              ↓ Pengeluaran
+            </button>
+          </div>
+          <div>
+            <label style="font-size:12px;color:var(--text2);margin-bottom:5px;display:block">Keterangan</label>
+            <input type="text" id="aDesc" placeholder="Contoh: Gaji, Makan siang, dll">
+          </div>
+          <div>
+            <label style="font-size:12px;color:var(--text2);margin-bottom:5px;display:block">Jumlah (Rp)</label>
+            <input type="number" id="aAmount" placeholder="0" min="0" inputmode="numeric" style="font-size:18px;font-family:var(--mono);font-weight:600;padding:14px">
+          </div>
+          <div>
+            <label style="font-size:12px;color:var(--text2);margin-bottom:5px;display:block">Kategori</label>
+            <select id="aCat">
+              <option value="Gaji">Gaji</option>
+              <option value="Bisnis">Bisnis</option>
+              <option value="Investasi">Investasi</option>
+              <option value="Makanan">Makanan</option>
+              <option value="Transport">Transport</option>
+              <option value="Belanja">Belanja</option>
+              <option value="Tagihan">Tagihan</option>
+              <option value="Kesehatan">Kesehatan</option>
+              <option value="Hiburan">Hiburan</option>
+              <option value="Lainnya">Lainnya</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:12px;color:var(--text2);margin-bottom:5px;display:block">Tanggal</label>
+            <input type="date" id="aDate">
+          </div>
+          <button class="btn-primary" onclick="addTransactionMobile()" style="padding:14px;font-size:15px">+ Simpan Transaksi</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TRANSACTIONS TAB -->
+    <div id="tab-transactions" class="tab-content" style="display:none">
+      <div style="margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+        <h2 style="font-size:20px;font-weight:700">Semua Transaksi</h2>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <select id="filterType" onchange="renderTransactions()" style="width:auto;font-size:13px;padding:6px 10px">
+            <option value="all">Semua Jenis</option>
+            <option value="income">Pemasukan</option>
+            <option value="expense">Pengeluaran</option>
+          </select>
+          <select id="filterCat" onchange="renderTransactions()" style="width:auto;font-size:13px;padding:6px 10px">
+            <option value="all">Semua Kategori</option>
+          </select>
+          <button class="btn-success" onclick="exportXLSX()" style="font-size:13px;padding:7px 14px">⬇ Ekspor .xlsx</button>
+        </div>
+      </div>
+      <div class="card" style="overflow:hidden">
+        <div id="transactionTable" style="overflow-x:auto"></div>
+      </div>
+    </div>
+
+    <!-- STATS TAB -->
+    <div id="tab-stats" class="tab-content" style="display:none">
+      <div style="margin-bottom:20px">
+        <h2 style="font-size:20px;font-weight:700">Statistik Keuangan</h2>
+        <p style="color:var(--text2);font-size:13px;margin-top:2px">Analisis pemasukan & pengeluaran Anda</p>
+      </div>
+      <div class="stats-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+        <div class="card" style="padding:20px">
+          <p style="font-weight:600;margin-bottom:4px;font-size:14px">Tren Bulanan</p>
+          <p style="font-size:11px;color:var(--text2);margin-bottom:14px">Pemasukan vs Pengeluaran</p>
+          <div style="position:relative;height:220px"><canvas id="trendChart"></canvas></div>
+        </div>
+        <div class="card" style="padding:20px">
+          <p style="font-weight:600;margin-bottom:4px;font-size:14px">Distribusi Pengeluaran</p>
+          <p style="font-size:11px;color:var(--text2);margin-bottom:14px">Berdasarkan kategori</p>
+          <div style="position:relative;height:220px"><canvas id="catChart"></canvas></div>
+        </div>
+      </div>
+      <div class="card" style="padding:20px">
+        <p style="font-weight:600;margin-bottom:4px;font-size:14px">Ringkasan per Kategori</p>
+        <div id="catSummary" style="margin-top:14px"></div>
+      </div>
+    </div>
+
+  </div><!-- end #mainContent -->
+</div><!-- end #appScreen -->
+
+<!-- TOAST -->
+<div id="toast" class="toast"></div>
+
+<!-- INSTALL BANNER -->
+<div id="installBanner">
+  <div style="flex:1">
+    <p>📲 Install FINANKU</p>
+    <small>Tambahkan ke layar utama untuk akses lebih cepat</small>
+  </div>
+  <button class="install-btn" onclick="triggerInstall()">Install</button>
+  <button class="install-dismiss" onclick="dismissInstall()">✕</button>
+</div>
+
+<!-- Scripts -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+// ====== PWA Install Logic ======
+let deferredInstallPrompt = null;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  // Tunda banner 3 detik biar tidak langsung muncul
+  if (!localStorage.getItem('finanku_install_dismissed')) {
+    setTimeout(() => {
+      document.getElementById('installBanner').classList.add('show');
+    }, 3000);
+  }
+});
+
+function triggerInstall() {
+  if (!deferredInstallPrompt) return;
+  deferredInstallPrompt.prompt();
+  deferredInstallPrompt.userChoice.then(result => {
+    if (result.outcome === 'accepted') {
+      toast('FINANKU berhasil diinstall! 🎉');
+    }
+    deferredInstallPrompt = null;
+    document.getElementById('installBanner').classList.remove('show');
+  });
+}
+
+function dismissInstall() {
+  document.getElementById('installBanner').classList.remove('show');
+  localStorage.setItem('finanku_install_dismissed', '1');
+}
+
+window.addEventListener('appinstalled', () => {
+  document.getElementById('installBanner').classList.remove('show');
+  toast('FINANKU berhasil diinstall! 🎉');
+  deferredInstallPrompt = null;
+});
+
+// Deteksi iOS
+function isIOS() {
+  return /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream;
+}
+function isInStandaloneMode() {
+  return ('standalone' in navigator && navigator.standalone) ||
+    window.matchMedia('(display-mode: standalone)').matches;
+}
+
+// Tampilkan hint iOS jika belum di-install
+window.addEventListener('load', () => {
+  if (isIOS() && !isInStandaloneMode()) {
+    document.getElementById('iosHint').style.display = 'block';
+  }
+});
+
+// ====== Service Worker Registration ======
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js', { scope: './' })
+      .then(reg => console.log('[FINANKU] SW registered:', reg.scope))
+      .catch(err => console.log('[FINANKU] SW failed:', err));
+  });
+}
+
+// ====== App State ======
+let currentUser = null;
+let trendChartInst = null;
+let catChartInst = null;
+let addTypeState = 'income'; // for mobile add tab
+
+// ====== Storage ======
+function getUsers(){return JSON.parse(localStorage.getItem('finanku_users')||'{}')}
+function saveUsers(u){localStorage.setItem('finanku_users',JSON.stringify(u))}
+function getTx(){
+  const users=getUsers();
+  return (users[currentUser]&&users[currentUser].transactions)||[];
+}
+function saveTx(txs){
+  const users=getUsers();
+  if(!users[currentUser])users[currentUser]={};
+  users[currentUser].transactions=txs;
+  saveUsers(users);
+}
+
+// ====== Toast ======
+function toast(msg, err) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast' + (err ? ' error' : '');
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// ====== Auth ======
+function doLogin() {
+  const u = document.getElementById('loginUser').value.trim();
+  const p = document.getElementById('loginPass').value;
+  if (!u || !p) { toast('Isi semua field', true); return; }
+  const users = getUsers();
+  if (!users[u]) { toast('Akun tidak ditemukan', true); return; }
+  if (users[u].password !== btoa(p)) { toast('Kata sandi salah', true); return; }
+  currentUser = u;
+  showApp(users[u].name || u);
+}
+
+function showRegister() { document.getElementById('registerModal').classList.add('open'); }
+function closeRegister() { document.getElementById('registerModal').classList.remove('open'); }
+
+function doRegister() {
+  const name = document.getElementById('regName').value.trim();
+  const u = document.getElementById('regUser').value.trim();
+  const p = document.getElementById('regPass').value;
+  if (!name || !u || !p) { toast('Isi semua field pendaftaran', true); return; }
+  if (p.length < 4) { toast('Kata sandi min. 4 karakter', true); return; }
+  const users = getUsers();
+  if (users[u]) { toast('Nama pengguna sudah digunakan', true); return; }
+  users[u] = { name, password: btoa(p), transactions: [] };
+  saveUsers(users);
+  closeRegister();
+  toast('Akun berhasil dibuat! Silakan masuk.');
+  document.getElementById('loginUser').value = u;
+}
+
+function doLogout() {
+  currentUser = null;
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('loginScreen').classList.add('active');
+  document.getElementById('appScreen').style.display = 'none';
+  document.getElementById('appScreen').classList.remove('active');
+  document.getElementById('loginPass').value = '';
+}
+
+function showApp(name) {
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('loginScreen').classList.remove('active');
+  document.getElementById('appScreen').style.display = 'flex';
+  document.getElementById('appScreen').classList.add('active');
+  document.getElementById('userBadge').textContent = '👤 ' + name;
+  const hr = new Date().getHours();
+  const gr = hr < 5 ? 'Selamat malam' : hr < 12 ? 'Selamat pagi' : hr < 15 ? 'Selamat siang' : hr < 18 ? 'Selamat sore' : 'Selamat malam';
+  document.getElementById('greetUser').textContent = gr + ', ' + name + '!';
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('qDate').value = today;
+  document.getElementById('aDate').value = today;
+  switchTab('dashboard');
+  refreshAll();
+}
+
+// ====== Tab Navigation ======
+function switchTab(tab) {
+  document.querySelectorAll('.tab-content').forEach(t => { t.style.display = 'none'; });
+  document.getElementById('tab-' + tab).style.display = 'block';
+
+  // Desktop nav
+  document.querySelectorAll('.nav-btn').forEach(b => {
+    b.style.background = b.dataset.tab === tab ? 'var(--bg3)' : '';
+    b.style.color = b.dataset.tab === tab ? 'var(--text)' : '';
+  });
+
+  // Mobile bottom nav
+  document.querySelectorAll('.bnav-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.tab === tab);
+  });
+
+  if (tab === 'stats') renderCharts();
+  if (tab === 'transactions') renderTransactions();
+}
+
+// ====== Mobile Add Tab ======
+function setAddType(type) {
+  addTypeState = type;
+  const incBtn = document.getElementById('addTypeIncome');
+  const expBtn = document.getElementById('addTypeExpense');
+  if (type === 'income') {
+    incBtn.style.background = 'rgba(52,211,153,0.15)';
+    incBtn.style.color = 'var(--accent3)';
+    incBtn.style.borderColor = 'var(--accent3)';
+    expBtn.style.background = 'var(--bg3)';
+    expBtn.style.color = 'var(--text2)';
+    expBtn.style.borderColor = 'var(--border2)';
+  } else {
+    expBtn.style.background = 'rgba(248,113,113,0.15)';
+    expBtn.style.color = 'var(--danger)';
+    expBtn.style.borderColor = 'var(--danger)';
+    incBtn.style.background = 'var(--bg3)';
+    incBtn.style.color = 'var(--text2)';
+    incBtn.style.borderColor = 'var(--border2)';
+  }
+}
+
+function addTransactionMobile() {
+  const type = addTypeState;
+  const desc = document.getElementById('aDesc').value.trim();
+  const amount = parseFloat(document.getElementById('aAmount').value);
+  const cat = document.getElementById('aCat').value;
+  const date = document.getElementById('aDate').value;
+  if (!desc) { toast('Isi keterangan transaksi', true); return; }
+  if (!amount || amount <= 0) { toast('Jumlah harus lebih dari 0', true); return; }
+  if (!date) { toast('Pilih tanggal', true); return; }
+  const txs = getTx();
+  txs.unshift({ id: Date.now(), type, desc, amount, cat, date });
+  saveTx(txs);
+  document.getElementById('aDesc').value = '';
+  document.getElementById('aAmount').value = '';
+  toast('Transaksi berhasil ditambahkan! ✓');
+  refreshAll();
+  // Kembali ke dashboard di mobile
+  setTimeout(() => switchTab('dashboard'), 400);
+}
+
+// ====== Transactions ======
+function addTransaction() {
+  const type = document.getElementById('qType').value;
+  const desc = document.getElementById('qDesc').value.trim();
+  const amount = parseFloat(document.getElementById('qAmount').value);
+  const cat = document.getElementById('qCat').value;
+  const date = document.getElementById('qDate').value;
+  if (!desc) { toast('Isi keterangan transaksi', true); return; }
+  if (!amount || amount <= 0) { toast('Jumlah harus lebih dari 0', true); return; }
+  if (!date) { toast('Pilih tanggal', true); return; }
+  const txs = getTx();
+  txs.unshift({ id: Date.now(), type, desc, amount, cat, date });
+  saveTx(txs);
+  document.getElementById('qDesc').value = '';
+  document.getElementById('qAmount').value = '';
+  toast('Transaksi berhasil ditambahkan! ✓');
+  refreshAll();
+}
+
+function deleteTransaction(id) {
+  if (!confirm('Hapus transaksi ini?')) return;
+  const txs = getTx().filter(t => t.id !== id);
+  saveTx(txs);
+  toast('Transaksi dihapus');
+  refreshAll();
+  renderTransactions();
+}
+
+function refreshAll() {
+  const txs = getTx();
+  const income = txs.filter(t => t.type === 'income').reduce((a, t) => a + t.amount, 0);
+  const expense = txs.filter(t => t.type === 'expense').reduce((a, t) => a + t.amount, 0);
+  const net = income - expense;
+  document.getElementById('totalIncome').textContent = 'Rp ' + fmt(income);
+  document.getElementById('totalExpense').textContent = 'Rp ' + fmt(expense);
+  const nb = document.getElementById('netBalance');
+  nb.textContent = 'Rp ' + fmt(Math.abs(net));
+  nb.style.color = net >= 0 ? 'var(--accent)' : 'var(--danger)';
+  document.getElementById('totalTrx').textContent = txs.length;
+  renderRecent(txs.slice(0, 8));
+}
+
+function fmt(n) { return Math.round(n).toLocaleString('id-ID'); }
+
+function txRow(t, compact) {
+  const d = new Date(t.date).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: '2-digit' });
+  if (compact) return `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--bg3);border-radius:var(--r2)">
+      <div style="display:flex;flex-direction:column;gap:2px;flex:1;min-width:0">
+        <span style="font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${t.desc}</span>
+        <span style="font-size:11px;color:var(--text2)">${t.cat} · ${d}</span>
+      </div>
+      <span style="font-family:var(--mono);font-size:13px;font-weight:600;margin-left:12px;color:${t.type === 'income' ? 'var(--accent3)' : 'var(--danger)'}">${t.type === 'income' ? '+' : '-'}${fmt(t.amount)}</span>
+    </div>`;
+  return `<tr style="border-bottom:1px solid var(--border2)">
+    <td style="padding:12px 16px;font-size:13px">${d}</td>
+    <td style="padding:12px 8px"><span class="${t.type === 'income' ? 'tag-income' : 'tag-expense'}">${t.type === 'income' ? 'Pemasukan' : 'Pengeluaran'}</span></td>
+    <td style="padding:12px 8px;font-size:13px">${t.desc}</td>
+    <td style="padding:12px 8px;font-size:12px;color:var(--text2)">${t.cat}</td>
+    <td style="padding:12px 8px;font-family:var(--mono);font-size:13px;font-weight:600;color:${t.type === 'income' ? 'var(--accent3)' : 'var(--danger)'}">
+      ${t.type === 'income' ? '+' : '-'}Rp ${fmt(t.amount)}</td>
+    <td style="padding:12px 16px"><button onclick="deleteTransaction(${t.id})" class="btn-danger" style="font-size:11px;padding:5px 10px">Hapus</button></td>
+  </tr>`;
+}
+
+function renderRecent(txs) {
+  const el = document.getElementById('recentList');
+  el.innerHTML = txs.length ? txs.map(t => txRow(t, true)).join('') :
+    '<p style="color:var(--text3);text-align:center;font-size:13px;padding:20px 0">Belum ada transaksi</p>';
+}
+
+function renderTransactions() {
+  const fType = document.getElementById('filterType').value;
+  const fCat = document.getElementById('filterCat').value;
+  let txs = getTx();
+  const cats = [...new Set(txs.map(t => t.cat))];
+  const catSel = document.getElementById('filterCat');
+  const curCat = catSel.value;
+  catSel.innerHTML = '<option value="all">Semua Kategori</option>' + cats.map(c => `<option value="${c}"${c === curCat ? ' selected' : ''}>${c}</option>`).join('');
+  if (fType !== 'all') txs = txs.filter(t => t.type === fType);
+  if (fCat !== 'all') txs = txs.filter(t => t.cat === fCat);
+  const el = document.getElementById('transactionTable');
+  if (!txs.length) { el.innerHTML = '<p style="text-align:center;color:var(--text2);padding:40px;font-size:13px">Tidak ada transaksi</p>'; return; }
+  el.innerHTML = `<table style="width:100%;border-collapse:collapse">
+    <thead><tr style="background:var(--bg3)">
+      <th style="padding:12px 16px;text-align:left;font-size:12px;color:var(--text2);font-weight:500">Tanggal</th>
+      <th style="padding:12px 8px;text-align:left;font-size:12px;color:var(--text2);font-weight:500">Jenis</th>
+      <th style="padding:12px 8px;text-align:left;font-size:12px;color:var(--text2);font-weight:500">Keterangan</th>
+      <th style="padding:12px 8px;text-align:left;font-size:12px;color:var(--text2);font-weight:500">Kategori</th>
+      <th style="padding:12px 8px;text-align:left;font-size:12px;color:var(--text2);font-weight:500">Jumlah</th>
+      <th style="padding:12px 16px;text-align:left;font-size:12px;color:var(--text2);font-weight:500">Aksi</th>
+    </tr></thead>
+    <tbody>${txs.map(t => txRow(t, false)).join('')}</tbody>
+  </table>`;
+}
+
+// ====== Charts ======
+function renderCharts() {
+  const txs = getTx();
+  renderTrendChart(txs);
+  renderCatChart(txs);
+  renderCatSummary(txs);
+}
+
+function renderTrendChart(txs) {
+  const months = {};
+  txs.forEach(t => {
+    const m = t.date.substring(0, 7);
+    if (!months[m]) months[m] = { income: 0, expense: 0 };
+    months[m][t.type] += t.amount;
+  });
+  const labels = Object.keys(months).sort().slice(-6);
+  const incomes = labels.map(m => months[m].income || 0);
+  const expenses = labels.map(m => months[m].expense || 0);
+  const lblFmt = labels.map(m => { const [y, mo] = m.split('-'); return new Date(y, mo - 1).toLocaleDateString('id-ID', { month: 'short', year: '2-digit' }); });
+  const ctx = document.getElementById('trendChart').getContext('2d');
+  if (trendChartInst) trendChartInst.destroy();
+  trendChartInst = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: lblFmt, datasets: [
+        { label: 'Pemasukan', data: incomes, backgroundColor: 'rgba(52,211,153,0.7)', borderRadius: 4 },
+        { label: 'Pengeluaran', data: expenses, backgroundColor: 'rgba(248,113,113,0.7)', borderRadius: 4 }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: true, labels: { color: '#9ca3c4', font: { size: 11 }, boxWidth: 10 } } },
+      scales: {
+        x: { ticks: { color: '#9ca3c4', font: { size: 11 } }, grid: { color: 'rgba(255,255,255,0.04)' } },
+        y: { ticks: { color: '#9ca3c4', font: { size: 11 }, callback: v => v >= 1e6 ? (v / 1e6).toFixed(1) + 'jt' : v >= 1e3 ? (v / 1e3).toFixed(0) + 'rb' : v }, grid: { color: 'rgba(255,255,255,0.04)' } }
+      }
+    }
+  });
+}
+
+function renderCatChart(txs) {
+  const cats = {};
+  txs.filter(t => t.type === 'expense').forEach(t => { cats[t.cat] = (cats[t.cat] || 0) + t.amount; });
+  const labels = Object.keys(cats);
+  const data = Object.values(cats);
+  const colors = ['#6c63ff', '#f87171', '#34d399', '#fbbf24', '#a78bfa', '#60a5fa', '#fb923c', '#f472b6', '#4ade80', '#e879f9'];
+  const ctx = document.getElementById('catChart').getContext('2d');
+  if (catChartInst) catChartInst.destroy();
+  if (!labels.length) { ctx.clearRect(0, 0, 999, 999); return; }
+  catChartInst = new Chart(ctx, {
+    type: 'doughnut',
+    data: { labels, datasets: [{ data, backgroundColor: colors.slice(0, labels.length), borderWidth: 0 }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { color: '#9ca3c4', font: { size: 11 }, boxWidth: 10, padding: 10 } } } }
+  });
+}
+
+function renderCatSummary(txs) {
+  const cats = {};
+  txs.forEach(t => {
+    if (!cats[t.cat]) cats[t.cat] = { income: 0, expense: 0 };
+    cats[t.cat][t.type] += t.amount;
+  });
+  const el = document.getElementById('catSummary');
+  const rows = Object.entries(cats).sort((a, b) => (b[1].income + b[1].expense) - (a[1].income + a[1].expense));
+  el.innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px">
+    ${rows.map(([cat, v]) => `
+      <div style="background:var(--bg3);border-radius:var(--r2);padding:14px">
+        <p style="font-size:13px;font-weight:500;margin-bottom:8px">${cat}</p>
+        <p style="font-size:11px;color:var(--accent3)">+ Rp ${fmt(v.income)}</p>
+        <p style="font-size:11px;color:var(--danger)">- Rp ${fmt(v.expense)}</p>
+      </div>`).join('')}
+  </div>`;
+}
+
+// ====== Export ======
+function exportXLSX() {
+  const txs = getTx();
+  if (!txs.length) { toast('Tidak ada data untuk diekspor', true); return; }
+  const income = txs.filter(t => t.type === 'income').reduce((a, t) => a + t.amount, 0);
+  const expense = txs.filter(t => t.type === 'expense').reduce((a, t) => a + t.amount, 0);
+  const wb = XLSX.utils.book_new();
+  const rows = [['Tanggal', 'Jenis', 'Keterangan', 'Kategori', 'Jumlah (Rp)'],
+    ...txs.map(t => [t.date, t.type === 'income' ? 'Pemasukan' : 'Pengeluaran', t.desc, t.cat, t.amount])];
+  const ws = XLSX.utils.aoa_to_sheet(rows);
+  ws['!cols'] = [{ wch: 14 }, { wch: 14 }, { wch: 30 }, { wch: 16 }, { wch: 18 }];
+  XLSX.utils.book_append_sheet(wb, ws, 'Transaksi');
+  const sumRows = [['Ringkasan', ''], ['Total Pemasukan', income], ['Total Pengeluaran', expense], ['Saldo Bersih', income - expense], ['Jumlah Transaksi', txs.length]];
+  const ws2 = XLSX.utils.aoa_to_sheet(sumRows);
+  ws2['!cols'] = [{ wch: 20 }, { wch: 18 }];
+  XLSX.utils.book_append_sheet(wb, ws2, 'Ringkasan');
+  const date = new Date().toISOString().split('T')[0];
+  XLSX.writeFile(wb, `FINANKU_${currentUser}_${date}.xlsx`);
+  toast('File berhasil diunduh! 📊');
+}
+
+// ====== Keyboard Events ======
+document.getElementById('loginPass').addEventListener('keypress', e => { if (e.key === 'Enter') doLogin(); });
+document.getElementById('loginUser').addEventListener('keypress', e => { if (e.key === 'Enter') document.getElementById('loginPass').focus(); });
+
+// ====== Init: Hide Loader ======
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    document.getElementById('appLoader').classList.add('hidden');
+    setTimeout(() => document.getElementById('appLoader').remove(), 400);
+  }, 600);
+});
+</script>
+</body>
+</html>
