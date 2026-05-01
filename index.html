@@ -1108,8 +1108,6 @@ function renderCatSummary(txs) {
 async function exportXLSX() {
   const txs = getTx();
   if (!txs.length) { toast('Tidak ada data untuk diekspor', true); return; }
-  const income = txs.filter(t => t.type === 'income').reduce((a, t) => a + t.amount, 0);
-  const expense = txs.filter(t => t.type === 'expense').reduce((a, t) => a + t.amount, 0);
   toast('Menyiapkan file Excel...');
   const wb = new ExcelJS.Workbook();
   wb.creator = 'FINANKU';
@@ -1118,30 +1116,35 @@ async function exportXLSX() {
   // ---- Sheet 1: Transaksi ----
   const ws = wb.addWorksheet('Transaksi');
   ws.columns = [
-    { header: 'Tanggal',      key: 'date',   width: 14 },
-    { header: 'Jenis',        key: 'type',   width: 15 },
-    { header: 'Keterangan',   key: 'desc',   width: 32 },
+    { header: 'Tanggal',      key: 'date',   width: 16 },
+    { header: 'Jenis',        key: 'type',   width: 16 },
+    { header: 'Keterangan',   key: 'desc',   width: 36 },
     { header: 'Kategori',     key: 'cat',    width: 18 },
     { header: 'Jumlah (Rp)', key: 'amount', width: 20 },
   ];
-  const thin = { style: 'thin', color: { argb: 'FFB0AEDD' } };
-  const borderAll = { top: thin, left: thin, bottom: thin, right: thin };
-  const headerFill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF6C63FF' } };
-  const incFill   = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF0D3D2D' } };
-  const expFill   = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF3D0D0D' } };
+
+  const thinBlack = { style: 'thin', color: { argb: 'FF000000' } };
+  const borderAll = { top: thinBlack, left: thinBlack, bottom: thinBlack, right: thinBlack };
+  // Blue header matching image: #4472C4
+  const headerFill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF4472C4' } };
+  // Pemasukan: green bg (#70AD47), Pengeluaran: red bg (#FF0000)
+  const incFill  = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF70AD47' } };
+  const expFill  = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFF0000' } };
 
   // Header row
   const hdr = ws.getRow(1);
-  hdr.eachCell(cell => {
+  ['date','type','desc','cat','amount'].forEach((key, idx) => {
+    const cell = hdr.getCell(idx + 1);
     cell.fill = headerFill;
-    cell.font = { bold: true, color: { argb: 'FFFFFFFF' }, size: 11 };
+    cell.font = { bold: true, color: { argb: 'FFFFFFFF' }, size: 11, name: 'Calibri' };
     cell.border = borderAll;
-    cell.alignment = { vertical: 'middle', horizontal: 'center' };
+    cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: false };
   });
-  hdr.height = 22;
+  hdr.height = 20;
 
   // Data rows
-  txs.forEach((t, i) => {
+  txs.forEach((t) => {
+    const isIncome = t.type === 'income';
     const row = ws.addRow({
       date: t.date,
       type: t.type === 'income' ? 'Pemasukan' : 'Pengeluaran',
@@ -1150,59 +1153,21 @@ async function exportXLSX() {
       amount: t.amount,
     });
     row.height = 18;
-    const isIncome = t.type === 'income';
     row.eachCell(cell => {
       cell.border = borderAll;
+      cell.font = { name: 'Calibri', size: 11, color: { argb: 'FF000000' } };
       cell.alignment = { vertical: 'middle' };
     });
-    // Color type cell
+    // Jenis cell: colored background + white bold text
     const typeCell = row.getCell('type');
     typeCell.fill = isIncome ? incFill : expFill;
-    typeCell.font = { color: { argb: isIncome ? 'FF34D399' : 'FFF87171' }, bold: true };
-    // Amount cell
+    typeCell.font = { name: 'Calibri', size: 11, bold: true, color: { argb: 'FFFFFFFF' } };
+    typeCell.alignment = { vertical: 'middle', horizontal: 'center' };
+    // Amount cell: right-aligned, red color for expense
     const amtCell = row.getCell('amount');
     amtCell.numFmt = '#,##0';
-    amtCell.font = { color: { argb: isIncome ? 'FF34D399' : 'FFF87171' }, bold: true };
+    amtCell.font = { name: 'Calibri', size: 11, bold: true, color: { argb: isIncome ? 'FF70AD47' : 'FFFF0000' } };
     amtCell.alignment = { horizontal: 'right', vertical: 'middle' };
-    // Alternate row bg
-    if (i % 2 === 1) {
-      ['date','desc','cat'].forEach(k => {
-        const c = row.getCell(k);
-        if (!c.fill || c.fill.fgColor?.argb === 'FFFFFFFF' || !c.fill.type) {
-          c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1E2235' } };
-        }
-      });
-    }
-  });
-
-  // ---- Sheet 2: Ringkasan ----
-  const ws2 = wb.addWorksheet('Ringkasan');
-  ws2.columns = [{ header: '', key: 'label', width: 24 }, { header: '', key: 'val', width: 22 }];
-  const sumData = [
-    ['RINGKASAN KEUANGAN', ''],
-    ['Total Pemasukan',    income],
-    ['Total Pengeluaran',  expense],
-    ['Saldo Bersih',       income - expense],
-    ['Jumlah Transaksi',   txs.length],
-    ['Diekspor pada',      new Date().toLocaleDateString('id-ID')],
-  ];
-  sumData.forEach(([label, val], i) => {
-    const row = ws2.addRow({ label, val });
-    row.height = 20;
-    if (i === 0) {
-      row.getCell('label').font = { bold: true, size: 13, color: { argb: 'FF6C63FF' } };
-      row.getCell('label').fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1A1D27' } };
-      ws2.mergeCells(`A${i+1}:B${i+1}`);
-    } else {
-      row.eachCell(cell => { cell.border = borderAll; cell.alignment = { vertical: 'middle' }; });
-      row.getCell('label').font = { bold: true };
-      row.getCell('label').fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF22263A' } };
-      if (typeof val === 'number' && i < 4) {
-        row.getCell('val').numFmt = '"Rp "#,##0';
-        const color = i === 3 ? (val >= 0 ? 'FF34D399' : 'FFF87171') : i === 1 ? 'FF34D399' : 'FFF87171';
-        row.getCell('val').font = { bold: true, color: { argb: color } };
-      }
-    }
   });
 
   const date = new Date().toISOString().split('T')[0];
@@ -1226,67 +1191,77 @@ function exportPDF() {
   const net = income - expense;
   const today = new Date().toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'});
 
-  // Header
-  doc.setFillColor(108, 99, 255);
-  doc.rect(0, 0, 297, 22, 'F');
+  // White background
+  doc.setFillColor(255, 255, 255);
+  doc.rect(0, 0, 297, 210, 'F');
+
+  // Green header bar (matching image: bright green #4CAF50-ish)
+  doc.setFillColor(76, 175, 80);
+  doc.rect(0, 0, 297, 24, 'F');
   doc.setTextColor(255, 255, 255);
   doc.setFontSize(16); doc.setFont('helvetica','bold');
-  doc.text('FINANKU — Laporan Keuangan', 14, 14);
+  doc.text('FINANKU — Laporan Keuangan', 148, 11, { align: 'center' });
   doc.setFontSize(9); doc.setFont('helvetica','normal');
-  doc.text(`Pengguna: ${currentUser}   |   Diekspor: ${today}`, 190, 14, { align: 'right' });
+  doc.text(`Pengguna: ${currentUser}   |   Diekspor: ${today}`, 148, 18, { align: 'center' });
 
-  // Summary boxes
-  doc.setTextColor(30, 34, 53);
+  // Summary boxes — light background, dark text
   const boxes = [
-    { label: 'Total Pemasukan',  val: 'Rp ' + fmt(income),  bg: [13,61,45],  fg: [52,211,153] },
-    { label: 'Total Pengeluaran',val: 'Rp ' + fmt(expense), bg: [61,13,13],  fg: [248,113,113] },
-    { label: 'Saldo Bersih',     val: 'Rp ' + fmt(Math.abs(net)), bg: net>=0?[10,15,40]:[61,13,13], fg: net>=0?[108,99,255]:[248,113,113] },
-    { label: 'Jml Transaksi',    val: txs.length + ' transaksi', bg: [26,29,39], fg: [167,139,250] },
+    { label: 'Total Pemasukan',  val: 'Rp ' + fmt(income),         bg: [13,61,45],   fg: [52,211,153],  lbg:[230,245,235], lfg:[30,100,50] },
+    { label: 'Total Pengeluaran',val: 'Rp ' + fmt(expense),        bg: [61,13,13],   fg: [220,50,50],   lbg:[245,230,230], lfg:[150,20,20] },
+    { label: 'Saldo Bersih',     val: 'Rp ' + fmt(Math.abs(net)),  bg: [10,15,40],   fg: [108,99,255],  lbg:[235,233,255], lfg:[60,50,180] },
+    { label: 'Jml Transaksi',    val: txs.length + ' transaksi',   bg: [26,29,39],   fg: [130,100,200], lbg:[240,237,255], lfg:[80,60,180] },
   ];
   boxes.forEach((b, i) => {
     const x = 14 + i * 68;
-    doc.setFillColor(...b.bg);
-    doc.roundedRect(x, 26, 64, 18, 2, 2, 'F');
-    doc.setFontSize(8); doc.setFont('helvetica','normal');
-    doc.setTextColor(180,180,200);
-    doc.text(b.label, x+4, 32);
+    // Light box
+    doc.setFillColor(...b.lbg);
+    doc.roundedRect(x, 28, 64, 18, 2, 2, 'F');
+    // Border
+    doc.setDrawColor(200, 200, 200);
+    doc.setLineWidth(0.3);
+    doc.roundedRect(x, 28, 64, 18, 2, 2, 'S');
+    doc.setFontSize(7.5); doc.setFont('helvetica','normal');
+    doc.setTextColor(100, 100, 100);
+    doc.text(b.label, x+4, 34);
     doc.setFontSize(11); doc.setFont('helvetica','bold');
-    doc.setTextColor(...b.fg);
-    doc.text(b.val, x+4, 40);
+    doc.setTextColor(...b.lfg);
+    doc.text(b.val, x+4, 42);
   });
 
   // Table
   const rows = txs.map(t => [
-    new Date(t.date).toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'2-digit'}),
+    t.date,
     t.type === 'income' ? 'Pemasukan' : 'Pengeluaran',
     t.desc,
     t.cat,
-    (t.type==='income' ? '+' : '-') + ' Rp ' + fmt(t.amount),
+    (t.type==='income' ? '+ Rp ' : '- Rp ') + fmt(t.amount),
   ]);
 
   doc.autoTable({
-    startY: 50,
+    startY: 52,
     head: [['Tanggal', 'Jenis', 'Keterangan', 'Kategori', 'Jumlah (Rp)']],
     body: rows,
     theme: 'grid',
-    styles: { fontSize: 9, cellPadding: 3, textColor: [200,205,230], lineColor: [60,65,100], lineWidth: 0.3 },
-    headStyles: { fillColor: [108,99,255], textColor: [255,255,255], fontStyle: 'bold', fontSize: 9 },
-    alternateRowStyles: { fillColor: [30,34,53] },
-    bodyStyles: { fillColor: [22,26,39] },
+    styles: { fontSize: 9, cellPadding: 3, textColor: [30,30,30], lineColor: [180,180,180], lineWidth: 0.3, font: 'helvetica', fillColor: [255,255,255] },
+    headStyles: { fillColor: [70,130,200], textColor: [255,255,255], fontStyle: 'bold', fontSize: 9, halign: 'center' },
+    alternateRowStyles: { fillColor: [240,245,255] },
+    bodyStyles: { fillColor: [255,255,255], textColor: [30,30,30] },
     columnStyles: {
       0: { cellWidth: 26 },
-      1: { cellWidth: 28 },
+      1: { cellWidth: 28, halign: 'center' },
       2: { cellWidth: 90 },
       3: { cellWidth: 32 },
       4: { cellWidth: 42, halign: 'right' },
     },
     didParseCell(data) {
       if (data.section === 'body' && data.column.index === 1) {
-        data.cell.styles.textColor = data.cell.raw === 'Pemasukan' ? [52,211,153] : [248,113,113];
+        const isInc = data.cell.raw === 'Pemasukan';
+        data.cell.styles.textColor = isInc ? [34,139,34] : [200,30,30];
         data.cell.styles.fontStyle = 'bold';
       }
       if (data.section === 'body' && data.column.index === 4) {
-        data.cell.styles.textColor = data.cell.raw.startsWith('+') ? [52,211,153] : [248,113,113];
+        const isInc = data.cell.raw.startsWith('+');
+        data.cell.styles.textColor = isInc ? [34,139,34] : [200,30,30];
         data.cell.styles.fontStyle = 'bold';
       }
     },
@@ -1298,8 +1273,8 @@ function exportPDF() {
   for (let i = 1; i <= pageCount; i++) {
     doc.setPage(i);
     doc.setFontSize(7); doc.setFont('helvetica','normal');
-    doc.setTextColor(100,110,150);
-    doc.text(`FINANKU · Data tersimpan lokal di perangkat Anda · Halaman ${i} dari ${pageCount}`, 14, 205);
+    doc.setTextColor(150,150,150);
+    doc.text(`FINANKU · Data tersimpan lokal di perangkat Anda · Halaman ${i} dari ${pageCount}`, 148, 205, { align: 'center' });
   }
 
   const date = new Date().toISOString().split('T')[0];
