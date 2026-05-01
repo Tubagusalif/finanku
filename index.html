@@ -109,7 +109,6 @@
     .dashboard-grid{grid-template-columns:1fr 1fr!important}
     .main-content-cols{grid-template-columns:1fr!important}
     .stats-grid{grid-template-columns:1fr!important}
-    .bnav-btn{padding:6px 10px;min-width:52px;font-size:9px}
   }
   @media(min-width:641px){
     #topNav{display:flex!important}
@@ -131,35 +130,6 @@
   #appLoader.hidden{opacity:0;pointer-events:none}
   .spinner{width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite}
   @keyframes spin{to{transform:rotate(360deg)}}
-  /* Password toggle */
-  .pass-wrap{position:relative}
-  .pass-wrap input{padding-right:44px!important}
-  .pass-eye{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:transparent;border:none;color:var(--text3);padding:4px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:color .15s;line-height:1}
-  .pass-eye:hover{color:var(--text)}
-  /* Forgot pass link */
-  .forgot-link{font-size:12px;color:var(--accent);cursor:pointer;text-decoration:none;border:none;background:transparent;padding:0;font-family:var(--font)}
-  .forgot-link:hover{text-decoration:underline}
-  /* Export buttons */
-  .btn-export-pdf{background:rgba(248,113,113,0.12);color:var(--danger);border:1px solid rgba(248,113,113,0.25);border-radius:var(--r2);padding:7px 14px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font);transition:all .15s}
-  .btn-export-pdf:hover{background:rgba(248,113,113,0.22)}
-  /* Edit button */
-  .btn-edit{background:rgba(108,99,255,0.12);color:var(--accent2);border:1px solid rgba(108,99,255,0.25);border-radius:var(--r2);padding:5px 10px;font-size:11px;font-weight:500;cursor:pointer;font-family:var(--font);transition:all .15s;margin-right:6px}
-  .btn-edit:hover{background:rgba(108,99,255,0.25)}
-  /* Custom cat input reveal */
-  .custom-cat-wrap{margin-top:8px;animation:fadeIn .18s ease}
-  /* History grouped rows */
-  .history-month-group{margin-bottom:20px}
-  .history-month-label{font-size:12px;font-weight:600;color:var(--accent2);text-transform:uppercase;letter-spacing:.8px;padding:6px 0 10px;border-bottom:1px solid var(--border2);margin-bottom:10px;display:flex;align-items:center;justify-content:space-between}
-  .history-item{display:flex;align-items:center;gap:12px;padding:11px 14px;background:var(--bg3);border-radius:var(--r2);margin-bottom:6px;border-left:3px solid transparent;transition:border-color .15s}
-  .history-item.income{border-left-color:var(--accent3)}
-  .history-item.expense{border-left-color:var(--danger)}
-  .history-item:hover{background:var(--bg4)}
-  .hist-date{font-size:11px;color:var(--text3);min-width:52px;font-family:var(--mono)}
-  .hist-info{flex:1;min-width:0}
-  .hist-desc{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .hist-meta{display:flex;align-items:center;gap:6px;margin-top:3px;flex-wrap:wrap}
-  .hist-amt{font-family:var(--mono);font-size:13px;font-weight:700;white-space:nowrap}
-  .badge-cat{background:var(--bg4);color:var(--text2);padding:2px 8px;border-radius:20px;font-size:10px;font-weight:500}
 </style>
 </head>
 <body>
@@ -186,15 +156,7 @@
         </div>
         <div>
           <label style="font-size:12px;color:var(--text2);margin-bottom:6px;display:block">Kata Sandi</label>
-          <div class="pass-wrap">
-            <input type="password" id="loginPass" placeholder="Masukkan kata sandi" autocomplete="current-password">
-            <button type="button" class="pass-eye" id="eyeLoginPass" onclick="togglePass('loginPass','eyeLoginPass')" aria-label="Tampilkan sandi">
-              <svg id="eyeLoginPass-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-            </button>
-          </div>
-        </div>
-        <div style="display:flex;justify-content:flex-end;margin-top:-4px">
-          <button class="forgot-link" onclick="showForgotPass()">Lupa sandi?</button>
+          <input type="password" id="loginPass" placeholder="Masukkan kata sandi" autocomplete="current-password">
         </div>
         <button class="btn-primary" onclick="doLogin()" style="margin-top:4px;width:100%;padding:13px 20px;font-size:15px">Masuk</button>
       </div>
@@ -228,134 +190,11 @@
       </div>
       <div>
         <label style="font-size:12px;color:var(--text2);margin-bottom:6px;display:block">Kata Sandi</label>
-        <div class="pass-wrap">
-          <input type="password" id="regPass" placeholder="Buat kata sandi (min. 4 karakter)" autocomplete="new-password">
-          <button type="button" class="pass-eye" id="eyeRegPass" onclick="togglePass('regPass','eyeRegPass')" aria-label="Tampilkan sandi">
-            <svg id="eyeRegPass-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-          </button>
-        </div>
-      </div>
-      <div>
-        <label style="font-size:12px;color:var(--text2);margin-bottom:6px;display:block">Pertanyaan Keamanan <span style="color:var(--text3)">(untuk lupa sandi)</span></label>
-        <select id="regSecQ">
-          <option value="Nama hewan peliharaan pertama Anda?">Nama hewan peliharaan pertama Anda?</option>
-          <option value="Nama kota kelahiran Anda?">Nama kota kelahiran Anda?</option>
-          <option value="Nama SD tempat Anda belajar?">Nama SD tempat Anda belajar?</option>
-          <option value="Makanan favorit masa kecil Anda?">Makanan favorit masa kecil Anda?</option>
-          <option value="Nama panggilan Anda saat kecil?">Nama panggilan Anda saat kecil?</option>
-        </select>
-      </div>
-      <div>
-        <label style="font-size:12px;color:var(--text2);margin-bottom:6px;display:block">Jawaban Pertanyaan Keamanan</label>
-        <input type="text" id="regSecA" placeholder="Jawaban (tidak case-sensitive)" autocomplete="off">
+        <input type="password" id="regPass" placeholder="Buat kata sandi (min. 4 karakter)" autocomplete="new-password">
       </div>
       <div style="display:flex;gap:10px;margin-top:4px">
         <button class="btn-ghost" onclick="closeRegister()" style="flex:1">Batal</button>
         <button class="btn-primary" onclick="doRegister()" style="flex:2">Daftar</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- FORGOT PASSWORD MODAL -->
-<div id="forgotModal" class="modal-overlay">
-  <div class="modal">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
-      <h2 style="font-size:18px;font-weight:600">Lupa Sandi</h2>
-      <button onclick="closeForgotPass()" style="background:transparent;border:none;color:var(--text3);font-size:20px;cursor:pointer;padding:4px;line-height:1">✕</button>
-    </div>
-    <!-- Step 1: Enter username -->
-    <div id="fpStep1">
-      <p style="font-size:13px;color:var(--text2);margin-bottom:16px">Masukkan nama pengguna Anda untuk melanjutkan pemulihan akun.</p>
-      <div style="display:flex;flex-direction:column;gap:14px">
-        <div>
-          <label style="font-size:12px;color:var(--text2);margin-bottom:6px;display:block">Nama Pengguna</label>
-          <input type="text" id="fpUser" placeholder="Masukkan nama pengguna" autocomplete="username">
-        </div>
-        <div style="display:flex;gap:10px">
-          <button class="btn-ghost" onclick="closeForgotPass()" style="flex:1">Batal</button>
-          <button class="btn-primary" onclick="fpNextStep()" style="flex:2">Lanjutkan →</button>
-        </div>
-      </div>
-    </div>
-    <!-- Step 2: Security question + new password -->
-    <div id="fpStep2" style="display:none">
-      <div style="background:var(--bg3);border-radius:var(--r2);padding:14px;margin-bottom:16px;border-left:3px solid var(--accent)">
-        <p style="font-size:11px;color:var(--text2);margin-bottom:4px">Pertanyaan Keamanan</p>
-        <p id="fpQuestion" style="font-size:13px;font-weight:500"></p>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:14px">
-        <div>
-          <label style="font-size:12px;color:var(--text2);margin-bottom:6px;display:block">Jawaban Anda</label>
-          <input type="text" id="fpAnswer" placeholder="Jawaban pertanyaan keamanan" autocomplete="off">
-        </div>
-        <div>
-          <label style="font-size:12px;color:var(--text2);margin-bottom:6px;display:block">Kata Sandi Baru</label>
-          <div class="pass-wrap">
-            <input type="password" id="fpNewPass" placeholder="Kata sandi baru (min. 4 karakter)" autocomplete="new-password">
-            <button type="button" class="pass-eye" id="eyeFpPass" onclick="togglePass('fpNewPass','eyeFpPass')" aria-label="Tampilkan sandi">
-              <svg id="eyeFpPass-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-            </button>
-          </div>
-        </div>
-        <div style="display:flex;gap:10px">
-          <button class="btn-ghost" onclick="fpBackStep()" style="flex:1">← Kembali</button>
-          <button class="btn-primary" onclick="fpReset()" style="flex:2">Reset Sandi ✓</button>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- EDIT TRANSACTION MODAL -->
-<div id="editModal" class="modal-overlay">
-  <div class="modal">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
-      <h2 style="font-size:18px;font-weight:600">Edit Transaksi</h2>
-      <button onclick="closeEditModal()" style="background:transparent;border:none;color:var(--text3);font-size:20px;cursor:pointer;padding:4px;line-height:1">✕</button>
-    </div>
-    <input type="hidden" id="editId">
-    <div style="display:flex;flex-direction:column;gap:14px">
-      <div>
-        <label style="font-size:12px;color:var(--text2);margin-bottom:6px;display:block">Jenis Transaksi</label>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-          <button id="editTypeIncome" onclick="setEditType('income')" style="background:rgba(52,211,153,0.15);color:var(--accent3);border:2px solid var(--accent3);border-radius:var(--r2);padding:10px;font-weight:600;font-size:13px">↑ Pemasukan</button>
-          <button id="editTypeExpense" onclick="setEditType('expense')" style="background:var(--bg3);color:var(--text2);border:2px solid var(--border2);border-radius:var(--r2);padding:10px;font-weight:600;font-size:13px">↓ Pengeluaran</button>
-        </div>
-      </div>
-      <div>
-        <label style="font-size:12px;color:var(--text2);margin-bottom:6px;display:block">Keterangan</label>
-        <input type="text" id="editDesc" placeholder="Keterangan transaksi">
-      </div>
-      <div>
-        <label style="font-size:12px;color:var(--text2);margin-bottom:6px;display:block">Jumlah (Rp)</label>
-        <input type="number" id="editAmount" placeholder="0" min="0" inputmode="numeric" style="font-family:var(--mono);font-weight:600">
-      </div>
-      <div>
-        <label style="font-size:12px;color:var(--text2);margin-bottom:6px;display:block">Kategori</label>
-        <select id="editCat" onchange="toggleCustomCat('edit')">
-          <option value="Gaji">Gaji</option>
-          <option value="Bisnis">Bisnis</option>
-          <option value="Investasi">Investasi</option>
-          <option value="Makanan">Makanan</option>
-          <option value="Transport">Transport</option>
-          <option value="Belanja">Belanja</option>
-          <option value="Tagihan">Tagihan</option>
-          <option value="Kesehatan">Kesehatan</option>
-          <option value="Hiburan">Hiburan</option>
-          <option value="Lainnya">Lainnya</option>
-        </select>
-        <div id="editCatCustomWrap" class="custom-cat-wrap" style="display:none">
-          <input type="text" id="editCatCustom" placeholder="Tulis kategori sendiri...">
-        </div>
-      </div>
-      <div>
-        <label style="font-size:12px;color:var(--text2);margin-bottom:6px;display:block">Tanggal</label>
-        <input type="date" id="editDate">
-      </div>
-      <div style="display:flex;gap:10px;margin-top:4px">
-        <button class="btn-ghost" onclick="closeEditModal()" style="flex:1">Batal</button>
-        <button class="btn-primary" onclick="saveEdit()" style="flex:2">Simpan Perubahan ✓</button>
       </div>
     </div>
   </div>
@@ -373,7 +212,6 @@
     <div style="display:flex;gap:4px">
       <button class="nav-btn btn-ghost" data-tab="dashboard" onclick="switchTab('dashboard')" style="font-size:13px;padding:6px 14px">Dashboard</button>
       <button class="nav-btn btn-ghost" data-tab="transactions" onclick="switchTab('transactions')" style="font-size:13px;padding:6px 14px">Transaksi</button>
-      <button class="nav-btn btn-ghost" data-tab="riwayat" onclick="switchTab('riwayat')" style="font-size:13px;padding:6px 14px">Riwayat</button>
       <button class="nav-btn btn-ghost" data-tab="stats" onclick="switchTab('stats')" style="font-size:13px;padding:6px 14px">Statistik</button>
     </div>
     <div style="display:flex;align-items:center;gap:10px">
@@ -406,12 +244,6 @@
         </svg>
         Transaksi
       </button>
-      <button class="bnav-btn" data-tab="riwayat" onclick="switchTab('riwayat')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
-        </svg>
-        Riwayat
-      </button>
       <button class="bnav-btn" data-tab="stats" onclick="switchTab('stats')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/>
@@ -436,8 +268,8 @@
           <button class="btn-success" onclick="exportXLSX()" style="display:flex;align-items:center;gap:6px;font-size:13px">
             <span>⬇</span> Ekspor .xlsx
           </button>
-          <button class="btn-export-pdf" onclick="exportPDF()" style="display:flex;align-items:center;gap:6px;font-size:13px">
-            <span>📄</span> Ekspor PDF
+          <button onclick="exportPDF()" style="display:flex;align-items:center;gap:6px;font-size:13px;background:#e74c3c;color:#fff;border:none;border-radius:var(--r2);padding:8px 14px;font-weight:600;cursor:pointer">
+            <span>📄</span> Ekspor .pdf
           </button>
         </div>
       </div>
@@ -484,7 +316,7 @@
             </div>
             <div>
               <label style="font-size:12px;color:var(--text2);margin-bottom:5px;display:block">Kategori</label>
-              <select id="qCat" onchange="toggleCustomCat('q')">
+              <select id="qCat">
                 <option value="Gaji">Gaji</option>
                 <option value="Bisnis">Bisnis</option>
                 <option value="Investasi">Investasi</option>
@@ -494,11 +326,8 @@
                 <option value="Tagihan">Tagihan</option>
                 <option value="Kesehatan">Kesehatan</option>
                 <option value="Hiburan">Hiburan</option>
-                <option value="Lainnya">Lainnya...</option>
+                <option value="Lainnya">Lainnya</option>
               </select>
-              <div id="qCatCustomWrap" class="custom-cat-wrap" style="display:none">
-                <input type="text" id="qCatCustom" placeholder="Tulis kategori sendiri...">
-              </div>
             </div>
             <div>
               <label style="font-size:12px;color:var(--text2);margin-bottom:5px;display:block">Tanggal</label>
@@ -541,7 +370,7 @@
           </div>
           <div>
             <label style="font-size:12px;color:var(--text2);margin-bottom:5px;display:block">Kategori</label>
-            <select id="aCat" onchange="toggleCustomCat('a')">
+            <select id="aCat">
               <option value="Gaji">Gaji</option>
               <option value="Bisnis">Bisnis</option>
               <option value="Investasi">Investasi</option>
@@ -551,11 +380,8 @@
               <option value="Tagihan">Tagihan</option>
               <option value="Kesehatan">Kesehatan</option>
               <option value="Hiburan">Hiburan</option>
-              <option value="Lainnya">Lainnya...</option>
+              <option value="Lainnya">Lainnya</option>
             </select>
-            <div id="aCatCustomWrap" class="custom-cat-wrap" style="display:none">
-              <input type="text" id="aCatCustom" placeholder="Tulis kategori sendiri...">
-            </div>
           </div>
           <div>
             <label style="font-size:12px;color:var(--text2);margin-bottom:5px;display:block">Tanggal</label>
@@ -580,36 +406,12 @@
             <option value="all">Semua Kategori</option>
           </select>
           <button class="btn-success" onclick="exportXLSX()" style="font-size:13px;padding:7px 14px">⬇ Ekspor .xlsx</button>
-          <button class="btn-export-pdf" onclick="exportPDF()" style="font-size:13px;padding:7px 14px">📄 Ekspor PDF</button>
+          <button onclick="exportPDF()" style="font-size:13px;padding:7px 14px;background:#e74c3c;color:#fff;border:none;border-radius:var(--r2);font-weight:600;cursor:pointer">📄 Ekspor .pdf</button>
         </div>
       </div>
       <div class="card" style="overflow:hidden">
         <div id="transactionTable" style="overflow-x:auto"></div>
       </div>
-    </div>
-
-    <!-- RIWAYAT TAB -->
-    <div id="tab-riwayat" class="tab-content" style="display:none">
-      <div style="margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
-        <div>
-          <h2 style="font-size:20px;font-weight:700">Riwayat Transaksi</h2>
-          <p style="color:var(--text2);font-size:13px;margin-top:2px">Semua transaksi, dikelompokkan per bulan</p>
-        </div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-          <select id="riwayatType" onchange="renderHistory()" style="width:auto;font-size:13px;padding:6px 10px">
-            <option value="all">Semua Jenis</option>
-            <option value="income">Pemasukan</option>
-            <option value="expense">Pengeluaran</option>
-          </select>
-          <select id="riwayatCat" onchange="renderHistory()" style="width:auto;font-size:13px;padding:6px 10px">
-            <option value="all">Semua Kategori</option>
-          </select>
-        </div>
-      </div>
-      <!-- Summary strip -->
-      <div id="riwayatSummary" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:20px"></div>
-      <!-- Grouped list -->
-      <div id="riwayatList"></div>
     </div>
 
     <!-- STATS TAB -->
@@ -655,9 +457,9 @@
 <!-- Scripts -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 <script>
 // ====== PWA Install Logic ======
 let deferredInstallPrompt = null;
@@ -750,18 +552,6 @@ function toast(msg, err) {
   setTimeout(() => t.classList.remove('show'), 2800);
 }
 
-// ====== Password Toggle ======
-const EYE_OPEN = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`;
-const EYE_SHUT = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>`;
-function togglePass(inputId, btnId) {
-  const inp = document.getElementById(inputId);
-  const btn = document.getElementById(btnId);
-  const isHidden = inp.type === 'password';
-  inp.type = isHidden ? 'text' : 'password';
-  btn.innerHTML = isHidden ? EYE_SHUT : EYE_OPEN;
-  btn.style.color = isHidden ? 'var(--accent2)' : '';
-}
-
 // ====== Auth ======
 function doLogin() {
   const u = document.getElementById('loginUser').value.trim();
@@ -781,59 +571,15 @@ function doRegister() {
   const name = document.getElementById('regName').value.trim();
   const u = document.getElementById('regUser').value.trim();
   const p = document.getElementById('regPass').value;
-  const secQ = document.getElementById('regSecQ').value;
-  const secA = document.getElementById('regSecA').value.trim();
   if (!name || !u || !p) { toast('Isi semua field pendaftaran', true); return; }
   if (p.length < 4) { toast('Kata sandi min. 4 karakter', true); return; }
-  if (!secA) { toast('Isi jawaban pertanyaan keamanan', true); return; }
   const users = getUsers();
   if (users[u]) { toast('Nama pengguna sudah digunakan', true); return; }
-  users[u] = { name, password: btoa(p), transactions: [], secQ, secA: secA.toLowerCase().trim() };
+  users[u] = { name, password: btoa(p), transactions: [] };
   saveUsers(users);
   closeRegister();
   toast('Akun berhasil dibuat! Silakan masuk.');
   document.getElementById('loginUser').value = u;
-}
-
-// ====== Forgot Password ======
-function showForgotPass() {
-  document.getElementById('fpUser').value = '';
-  document.getElementById('fpAnswer').value = '';
-  document.getElementById('fpNewPass').value = '';
-  document.getElementById('fpStep1').style.display = '';
-  document.getElementById('fpStep2').style.display = 'none';
-  document.getElementById('forgotModal').classList.add('open');
-}
-function closeForgotPass() { document.getElementById('forgotModal').classList.remove('open'); }
-function fpNextStep() {
-  const u = document.getElementById('fpUser').value.trim();
-  if (!u) { toast('Masukkan nama pengguna', true); return; }
-  const users = getUsers();
-  if (!users[u]) { toast('Akun tidak ditemukan', true); return; }
-  if (!users[u].secQ) { toast('Akun ini tidak memiliki pertanyaan keamanan', true); return; }
-  document.getElementById('fpQuestion').textContent = users[u].secQ;
-  document.getElementById('fpStep1').style.display = 'none';
-  document.getElementById('fpStep2').style.display = '';
-}
-function fpBackStep() {
-  document.getElementById('fpStep1').style.display = '';
-  document.getElementById('fpStep2').style.display = 'none';
-}
-function fpReset() {
-  const u = document.getElementById('fpUser').value.trim();
-  const ans = document.getElementById('fpAnswer').value.trim().toLowerCase();
-  const newPass = document.getElementById('fpNewPass').value;
-  if (!ans) { toast('Masukkan jawaban', true); return; }
-  if (!newPass || newPass.length < 4) { toast('Kata sandi baru min. 4 karakter', true); return; }
-  const users = getUsers();
-  if (!users[u]) { toast('Akun tidak ditemukan', true); return; }
-  if (users[u].secA !== ans) { toast('Jawaban salah, coba lagi', true); return; }
-  users[u].password = btoa(newPass);
-  saveUsers(users);
-  closeForgotPass();
-  toast('Kata sandi berhasil direset! Silakan masuk. ✓');
-  document.getElementById('loginUser').value = u;
-  document.getElementById('loginPass').value = '';
 }
 
 function doLogout() {
@@ -879,7 +625,6 @@ function switchTab(tab) {
 
   if (tab === 'stats') renderCharts();
   if (tab === 'transactions') renderTransactions();
-  if (tab === 'riwayat') renderHistory();
 }
 
 // ====== Mobile Add Tab ======
@@ -908,22 +653,19 @@ function addTransactionMobile() {
   const type = addTypeState;
   const desc = document.getElementById('aDesc').value.trim();
   const amount = parseFloat(document.getElementById('aAmount').value);
-  const cat = getCatValue('a');
+  const cat = document.getElementById('aCat').value;
   const date = document.getElementById('aDate').value;
   if (!desc) { toast('Isi keterangan transaksi', true); return; }
   if (!amount || amount <= 0) { toast('Jumlah harus lebih dari 0', true); return; }
   if (!date) { toast('Pilih tanggal', true); return; }
-  if (cat === 'Lainnya') { toast('Tulis nama kategori dulu', true); return; }
   const txs = getTx();
   txs.unshift({ id: Date.now(), type, desc, amount, cat, date });
   saveTx(txs);
   document.getElementById('aDesc').value = '';
   document.getElementById('aAmount').value = '';
-  document.getElementById('aCatCustom').value = '';
-  document.getElementById('aCatCustomWrap').style.display = 'none';
-  document.getElementById('aCat').value = 'Gaji';
   toast('Transaksi berhasil ditambahkan! ✓');
   refreshAll();
+  // Kembali ke dashboard di mobile
   setTimeout(() => switchTab('dashboard'), 400);
 }
 
@@ -932,20 +674,16 @@ function addTransaction() {
   const type = document.getElementById('qType').value;
   const desc = document.getElementById('qDesc').value.trim();
   const amount = parseFloat(document.getElementById('qAmount').value);
-  const cat = getCatValue('q');
+  const cat = document.getElementById('qCat').value;
   const date = document.getElementById('qDate').value;
   if (!desc) { toast('Isi keterangan transaksi', true); return; }
   if (!amount || amount <= 0) { toast('Jumlah harus lebih dari 0', true); return; }
   if (!date) { toast('Pilih tanggal', true); return; }
-  if (cat === 'Lainnya') { toast('Tulis nama kategori dulu', true); return; }
   const txs = getTx();
   txs.unshift({ id: Date.now(), type, desc, amount, cat, date });
   saveTx(txs);
   document.getElementById('qDesc').value = '';
   document.getElementById('qAmount').value = '';
-  document.getElementById('qCatCustom').value = '';
-  document.getElementById('qCatCustomWrap').style.display = 'none';
-  document.getElementById('qCat').value = 'Gaji';
   toast('Transaksi berhasil ditambahkan! ✓');
   refreshAll();
 }
@@ -992,10 +730,7 @@ function txRow(t, compact) {
     <td style="padding:12px 8px;font-size:12px;color:var(--text2)">${t.cat}</td>
     <td style="padding:12px 8px;font-family:var(--mono);font-size:13px;font-weight:600;color:${t.type === 'income' ? 'var(--accent3)' : 'var(--danger)'}">
       ${t.type === 'income' ? '+' : '-'}Rp ${fmt(t.amount)}</td>
-    <td style="padding:12px 16px;white-space:nowrap">
-      <button onclick="openEditModal(${t.id})" class="btn-edit">✏ Edit</button>
-      <button onclick="deleteTransaction(${t.id})" class="btn-danger" style="font-size:11px;padding:5px 10px">Hapus</button>
-    </td>
+    <td style="padding:12px 16px"><button onclick="deleteTransaction(${t.id})" class="btn-danger" style="font-size:11px;padding:5px 10px">Hapus</button></td>
   </tr>`;
 }
 
@@ -1110,368 +845,166 @@ async function exportXLSX() {
   if (!txs.length) { toast('Tidak ada data untuk diekspor', true); return; }
   const income = txs.filter(t => t.type === 'income').reduce((a, t) => a + t.amount, 0);
   const expense = txs.filter(t => t.type === 'expense').reduce((a, t) => a + t.amount, 0);
-  toast('Menyiapkan file Excel...');
+
   const wb = new ExcelJS.Workbook();
   wb.creator = 'FINANKU';
-  wb.created = new Date();
 
-  // ---- Sheet 1: Transaksi ----
+  // === Sheet 1: Transaksi ===
   const ws = wb.addWorksheet('Transaksi');
   ws.columns = [
-    { header: 'Tanggal',      key: 'date',   width: 14 },
-    { header: 'Jenis',        key: 'type',   width: 15 },
-    { header: 'Keterangan',   key: 'desc',   width: 32 },
-    { header: 'Kategori',     key: 'cat',    width: 18 },
-    { header: 'Jumlah (Rp)', key: 'amount', width: 20 },
+    { key: 'a', width: 16 }, { key: 'b', width: 16 },
+    { key: 'c', width: 36 }, { key: 'd', width: 18 }, { key: 'e', width: 20 }
   ];
-  const thin = { style: 'thin', color: { argb: 'FFB0AEDD' } };
-  const borderAll = { top: thin, left: thin, bottom: thin, right: thin };
-  const headerFill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF6C63FF' } };
-  const incFill   = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF0D3D2D' } };
-  const expFill   = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF3D0D0D' } };
 
   // Header row
-  const hdr = ws.getRow(1);
-  hdr.eachCell(cell => {
-    cell.fill = headerFill;
-    cell.font = { bold: true, color: { argb: 'FFFFFFFF' }, size: 11 };
-    cell.border = borderAll;
-    cell.alignment = { vertical: 'middle', horizontal: 'center' };
-  });
+  const hdr = ws.addRow(['Tanggal', 'Jenis', 'Keterangan', 'Kategori', 'Jumlah (Rp)']);
   hdr.height = 22;
+  hdr.eachCell(cell => {
+    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF4040B8' } };
+    cell.font = { bold: true, color: { argb: 'FFFFFFFF' }, name: 'Calibri', size: 11 };
+    cell.alignment = { vertical: 'middle', horizontal: 'center' };
+    cell.border = { bottom: { style: 'thin', color: { argb: 'FF2E2E9A' } } };
+  });
 
   // Data rows
-  txs.forEach((t, i) => {
-    const row = ws.addRow({
-      date: t.date,
-      type: t.type === 'income' ? 'Pemasukan' : 'Pengeluaran',
-      desc: t.desc,
-      cat: t.cat,
-      amount: t.amount,
-    });
+  txs.forEach(t => {
+    const isInc = t.type === 'income';
+    const row = ws.addRow([t.date, isInc ? 'Pemasukan' : 'Pengeluaran', t.desc, t.cat, t.amount]);
     row.height = 18;
-    const isIncome = t.type === 'income';
-    row.eachCell(cell => {
-      cell.border = borderAll;
-      cell.alignment = { vertical: 'middle' };
-    });
-    // Color type cell
-    const typeCell = row.getCell('type');
-    typeCell.fill = isIncome ? incFill : expFill;
-    typeCell.font = { color: { argb: isIncome ? 'FF34D399' : 'FFF87171' }, bold: true };
-    // Amount cell
-    const amtCell = row.getCell('amount');
-    amtCell.numFmt = '#,##0';
-    amtCell.font = { color: { argb: isIncome ? 'FF34D399' : 'FFF87171' }, bold: true };
-    amtCell.alignment = { horizontal: 'right', vertical: 'middle' };
-    // Alternate row bg
-    if (i % 2 === 1) {
-      ['date','desc','cat'].forEach(k => {
-        const c = row.getCell(k);
-        if (!c.fill || c.fill.fgColor?.argb === 'FFFFFFFF' || !c.fill.type) {
-          c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1E2235' } };
-        }
-      });
-    }
+    row.getCell(1).font = { name: 'Calibri', size: 11 };
+    row.getCell(3).font = { name: 'Calibri', size: 11 };
+    row.getCell(4).font = { name: 'Calibri', size: 11 };
+
+    const jenisCell = row.getCell(2);
+    jenisCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: isInc ? 'FF27AE60' : 'FFC0392B' } };
+    jenisCell.font = { bold: true, color: { argb: 'FFFFFFFF' }, name: 'Calibri', size: 11 };
+    jenisCell.alignment = { horizontal: 'center', vertical: 'middle' };
+
+    const jumlahCell = row.getCell(5);
+    jumlahCell.value = t.amount;
+    jumlahCell.numFmt = '#,##0';
+    jumlahCell.font = { color: { argb: isInc ? 'FF27AE60' : 'FFC0392B' }, name: 'Calibri', size: 11 };
+    jumlahCell.alignment = { horizontal: 'right' };
   });
 
-  // ---- Sheet 2: Ringkasan ----
+  // === Sheet 2: Ringkasan ===
   const ws2 = wb.addWorksheet('Ringkasan');
-  ws2.columns = [{ header: '', key: 'label', width: 24 }, { header: '', key: 'val', width: 22 }];
-  const sumData = [
-    ['RINGKASAN KEUANGAN', ''],
-    ['Total Pemasukan',    income],
-    ['Total Pengeluaran',  expense],
-    ['Saldo Bersih',       income - expense],
-    ['Jumlah Transaksi',   txs.length],
-    ['Diekspor pada',      new Date().toLocaleDateString('id-ID')],
-  ];
-  sumData.forEach(([label, val], i) => {
-    const row = ws2.addRow({ label, val });
+  ws2.columns = [{ key: 'a', width: 24 }, { key: 'b', width: 22 }];
+
+  const titleRow = ws2.addRow(['Ringkasan Keuangan', '']);
+  ws2.mergeCells('A1:B1');
+  titleRow.getCell(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF4040B8' } };
+  titleRow.getCell(1).font = { bold: true, color: { argb: 'FFFFFFFF' }, size: 13, name: 'Calibri' };
+  titleRow.getCell(1).alignment = { horizontal: 'center', vertical: 'middle' };
+  titleRow.height = 24;
+
+  const sumColors = { 'Total Pemasukan': 'FF27AE60', 'Total Pengeluaran': 'FFC0392B', 'Saldo Bersih': 'FF2980B9', 'Jumlah Transaksi': 'FF8E44AD' };
+  const sumData = [['Total Pemasukan', income], ['Total Pengeluaran', expense], ['Saldo Bersih', income - expense], ['Jumlah Transaksi', txs.length]];
+  sumData.forEach(([label, val]) => {
+    const row = ws2.addRow([label, val]);
     row.height = 20;
-    if (i === 0) {
-      row.getCell('label').font = { bold: true, size: 13, color: { argb: 'FF6C63FF' } };
-      row.getCell('label').fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1A1D27' } };
-      ws2.mergeCells(`A${i+1}:B${i+1}`);
-    } else {
-      row.eachCell(cell => { cell.border = borderAll; cell.alignment = { vertical: 'middle' }; });
-      row.getCell('label').font = { bold: true };
-      row.getCell('label').fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF22263A' } };
-      if (typeof val === 'number' && i < 4) {
-        row.getCell('val').numFmt = '"Rp "#,##0';
-        const color = i === 3 ? (val >= 0 ? 'FF34D399' : 'FFF87171') : i === 1 ? 'FF34D399' : 'FFF87171';
-        row.getCell('val').font = { bold: true, color: { argb: color } };
-      }
-    }
+    row.getCell(1).font = { bold: true, name: 'Calibri', size: 11 };
+    row.getCell(2).font = { bold: true, color: { argb: sumColors[label] }, name: 'Calibri', size: 11 };
+    row.getCell(2).numFmt = label === 'Jumlah Transaksi' ? '0" transaksi"' : '#,##0';
+    row.getCell(2).alignment = { horizontal: 'right' };
   });
 
-  const date = new Date().toISOString().split('T')[0];
-  const buffer = await wb.xlsx.writeBuffer();
-  const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  const buf = await wb.xlsx.writeBuffer();
+  const blob = new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
+  const date = new Date().toISOString().split('T')[0];
   a.href = url; a.download = `FINANKU_${currentUser}_${date}.xlsx`; a.click();
   URL.revokeObjectURL(url);
-  toast('File Excel berhasil diunduh! 📊');
+  toast('File XLSX berhasil diunduh! 📊');
 }
 
 function exportPDF() {
   const txs = getTx();
   if (!txs.length) { toast('Tidak ada data untuk diekspor', true); return; }
-  toast('Menyiapkan PDF...');
+  const income = txs.filter(t => t.type === 'income').reduce((a, t) => a + t.amount, 0);
+  const expense = txs.filter(t => t.type === 'expense').reduce((a, t) => a + t.amount, 0);
+  const balance = income - expense;
+  const dateStr = new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' });
+
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
-  const income  = txs.filter(t=>t.type==='income').reduce((a,t)=>a+t.amount,0);
-  const expense = txs.filter(t=>t.type==='expense').reduce((a,t)=>a+t.amount,0);
-  const net = income - expense;
-  const today = new Date().toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'});
+  const W = doc.internal.pageSize.getWidth();
 
-  // Header
-  doc.setFillColor(108, 99, 255);
-  doc.rect(0, 0, 297, 22, 'F');
+  // Green header banner
+  doc.setFillColor(88, 196, 48);
+  doc.rect(0, 0, W, 30, 'F');
   doc.setTextColor(255, 255, 255);
-  doc.setFontSize(16); doc.setFont('helvetica','bold');
-  doc.text('FINANKU — Laporan Keuangan', 14, 14);
-  doc.setFontSize(9); doc.setFont('helvetica','normal');
-  doc.text(`Pengguna: ${currentUser}   |   Diekspor: ${today}`, 190, 14, { align: 'right' });
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(20);
+  doc.text('FIANKU \u2014 Laporan Keuangan', W / 2, 13, { align: 'center' });
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(10);
+  doc.text(`Pengguna: ${currentUser}  |  Diekspor: ${dateStr}`, W / 2, 22, { align: 'center' });
 
-  // Summary boxes
-  doc.setTextColor(30, 34, 53);
-  const boxes = [
-    { label: 'Total Pemasukan',  val: 'Rp ' + fmt(income),  bg: [13,61,45],  fg: [52,211,153] },
-    { label: 'Total Pengeluaran',val: 'Rp ' + fmt(expense), bg: [61,13,13],  fg: [248,113,113] },
-    { label: 'Saldo Bersih',     val: 'Rp ' + fmt(Math.abs(net)), bg: net>=0?[10,15,40]:[61,13,13], fg: net>=0?[108,99,255]:[248,113,113] },
-    { label: 'Jml Transaksi',    val: txs.length + ' transaksi', bg: [26,29,39], fg: [167,139,250] },
+  // Summary cards
+  const cards = [
+    { label: 'Total Pemasukan',   value: `Rp ${fmt(income)}`,      bg: [18, 68, 36],  vc: [46, 204, 113] },
+    { label: 'Total Pengeluaran', value: `Rp ${fmt(expense)}`,     bg: [72, 18, 18],  vc: [231, 76, 60]  },
+    { label: 'Saldo Bersih',      value: `Rp ${fmt(balance)}`,     bg: [18, 36, 72],  vc: [52, 152, 219] },
+    { label: 'Jumlah Transaksi',  value: `${txs.length} transaksi`,bg: [36, 18, 72],  vc: [155, 89, 182] }
   ];
-  boxes.forEach((b, i) => {
-    const x = 14 + i * 68;
-    doc.setFillColor(...b.bg);
-    doc.roundedRect(x, 26, 64, 18, 2, 2, 'F');
-    doc.setFontSize(8); doc.setFont('helvetica','normal');
-    doc.setTextColor(180,180,200);
-    doc.text(b.label, x+4, 32);
-    doc.setFontSize(11); doc.setFont('helvetica','bold');
-    doc.setTextColor(...b.fg);
-    doc.text(b.val, x+4, 40);
+  const cW = (W - 20) / 4;
+  cards.forEach((c, i) => {
+    const x = 10 + i * cW, y = 34;
+    doc.setFillColor(...c.bg);
+    doc.roundedRect(x, y, cW - 4, 22, 2, 2, 'F');
+    doc.setTextColor(180, 180, 180);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8);
+    doc.text(c.label, x + 4, y + 7);
+    doc.setTextColor(...c.vc);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(12);
+    doc.text(c.value, x + 4, y + 16);
   });
 
-  // Table
-  const rows = txs.map(t => [
-    new Date(t.date).toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'2-digit'}),
+  // Transaction table
+  const tableRows = txs.map(t => [
+    t.date,
     t.type === 'income' ? 'Pemasukan' : 'Pengeluaran',
     t.desc,
     t.cat,
-    (t.type==='income'?'+ ':' - ') + 'Rp ' + fmt(t.amount),
+    (t.type === 'income' ? '+ ' : '- ') + `Rp ${fmt(t.amount)}`
   ]);
 
   doc.autoTable({
-    startY: 50,
+    startY: 60,
     head: [['Tanggal', 'Jenis', 'Keterangan', 'Kategori', 'Jumlah (Rp)']],
-    body: rows,
-    theme: 'grid',
-    styles: { fontSize: 9, cellPadding: 3, textColor: [200,205,230], lineColor: [60,65,100], lineWidth: 0.3 },
-    headStyles: { fillColor: [108,99,255], textColor: [255,255,255], fontStyle: 'bold', fontSize: 9 },
-    alternateRowStyles: { fillColor: [30,34,53] },
-    bodyStyles: { fillColor: [22,26,39] },
+    body: tableRows,
+    styles: { font: 'helvetica', fontSize: 10, cellPadding: 3.5 },
+    headStyles: { fillColor: [91, 200, 245], textColor: [0, 0, 0], fontStyle: 'bold', halign: 'left' },
+    alternateRowStyles: { fillColor: [245, 245, 245] },
     columnStyles: {
-      0: { cellWidth: 26 },
-      1: { cellWidth: 28 },
-      2: { cellWidth: 90 },
+      0: { cellWidth: 28 },
+      1: { cellWidth: 32 },
+      2: { cellWidth: 'auto' },
       3: { cellWidth: 32 },
-      4: { cellWidth: 38, halign: 'right' },
+      4: { cellWidth: 40, halign: 'right' }
     },
     didParseCell(data) {
-      if (data.section === 'body' && data.column.index === 1) {
-        data.cell.styles.textColor = data.cell.raw === 'Pemasukan' ? [52,211,153] : [248,113,113];
+      if (data.section !== 'body') return;
+      if (data.column.index === 1) {
+        const isInc = data.cell.raw === 'Pemasukan';
+        data.cell.styles.textColor = isInc ? [39, 174, 96] : [192, 57, 43];
         data.cell.styles.fontStyle = 'bold';
       }
-      if (data.section === 'body' && data.column.index === 4) {
-        data.cell.styles.textColor = data.cell.raw.startsWith('+') ? [52,211,153] : [248,113,113];
-        data.cell.styles.fontStyle = 'bold';
+      if (data.column.index === 4) {
+        const isInc = String(data.cell.raw).startsWith('+');
+        data.cell.styles.textColor = isInc ? [39, 174, 96] : [192, 57, 43];
       }
     },
-    margin: { left: 14, right: 14 },
+    margin: { left: 10, right: 10 }
   });
 
-  // Footer
-  const pageCount = doc.internal.getNumberOfPages();
-  for (let i = 1; i <= pageCount; i++) {
-    doc.setPage(i);
-    doc.setFontSize(7); doc.setFont('helvetica','normal');
-    doc.setTextColor(100,110,150);
-    doc.text(`FINANKU · Data tersimpan lokal di perangkat Anda · Halaman ${i} dari ${pageCount}`, 14, 205);
-  }
-
-  const date = new Date().toISOString().split('T')[0];
-  doc.save(`FINANKU_${currentUser}_${date}.pdf`);
-  toast('PDF berhasil diunduh! 📄');
-}
-
-// ====== Custom Category ======
-const STANDARD_CATS = ['Gaji','Bisnis','Investasi','Makanan','Transport','Belanja','Tagihan','Kesehatan','Hiburan','Lainnya'];
-
-function toggleCustomCat(prefix) {
-  const sel = document.getElementById(prefix + 'Cat');
-  const wrap = document.getElementById(prefix + 'CatCustomWrap');
-  const inp = document.getElementById(prefix + 'CatCustom');
-  if (sel.value === 'Lainnya') {
-    wrap.style.display = 'block';
-    inp.focus();
-  } else {
-    wrap.style.display = 'none';
-    inp.value = '';
-  }
-}
-
-function getCatValue(prefix) {
-  const sel = document.getElementById(prefix + 'Cat');
-  if (sel.value === 'Lainnya') {
-    const custom = document.getElementById(prefix + 'CatCustom').value.trim();
-    return custom || 'Lainnya';
-  }
-  return sel.value;
-}
-
-// ====== Edit Transaction ======
-let editTypeState = 'income';
-
-function openEditModal(id) {
-  const tx = getTx().find(t => t.id === id);
-  if (!tx) return;
-  document.getElementById('editId').value = id;
-  document.getElementById('editDesc').value = tx.desc;
-  document.getElementById('editAmount').value = tx.amount;
-  document.getElementById('editDate').value = tx.date;
-
-  // Category: check if standard or custom
-  const catSel = document.getElementById('editCat');
-  const isStandard = STANDARD_CATS.includes(tx.cat);
-  if (isStandard) {
-    catSel.value = tx.cat;
-    document.getElementById('editCatCustomWrap').style.display = 'none';
-    document.getElementById('editCatCustom').value = '';
-  } else {
-    catSel.value = 'Lainnya';
-    document.getElementById('editCatCustomWrap').style.display = 'block';
-    document.getElementById('editCatCustom').value = tx.cat;
-  }
-
-  // Type buttons
-  setEditType(tx.type);
-  document.getElementById('editModal').classList.add('open');
-}
-
-function closeEditModal() { document.getElementById('editModal').classList.remove('open'); }
-
-function setEditType(type) {
-  editTypeState = type;
-  const inc = document.getElementById('editTypeIncome');
-  const exp = document.getElementById('editTypeExpense');
-  if (type === 'income') {
-    inc.style.cssText = 'background:rgba(52,211,153,0.15);color:var(--accent3);border:2px solid var(--accent3);border-radius:var(--r2);padding:10px;font-weight:600;font-size:13px';
-    exp.style.cssText = 'background:var(--bg3);color:var(--text2);border:2px solid var(--border2);border-radius:var(--r2);padding:10px;font-weight:600;font-size:13px';
-  } else {
-    exp.style.cssText = 'background:rgba(248,113,113,0.15);color:var(--danger);border:2px solid var(--danger);border-radius:var(--r2);padding:10px;font-weight:600;font-size:13px';
-    inc.style.cssText = 'background:var(--bg3);color:var(--text2);border:2px solid var(--border2);border-radius:var(--r2);padding:10px;font-weight:600;font-size:13px';
-  }
-}
-
-function saveEdit() {
-  const id = parseInt(document.getElementById('editId').value);
-  const desc = document.getElementById('editDesc').value.trim();
-  const amount = parseFloat(document.getElementById('editAmount').value);
-  const cat = getCatValue('edit');
-  const date = document.getElementById('editDate').value;
-  const type = editTypeState;
-  if (!desc) { toast('Isi keterangan transaksi', true); return; }
-  if (!amount || amount <= 0) { toast('Jumlah harus lebih dari 0', true); return; }
-  if (!date) { toast('Pilih tanggal', true); return; }
-  if (cat === 'Lainnya') { toast('Tulis nama kategori dulu', true); return; }
-  const txs = getTx().map(t => t.id === id ? { ...t, type, desc, amount, cat, date } : t);
-  saveTx(txs);
-  closeEditModal();
-  toast('Transaksi berhasil diperbarui! ✓');
-  refreshAll();
-  renderTransactions();
-  // Juga update riwayat jika sedang terbuka
-  const riwayatTab = document.getElementById('tab-riwayat');
-  if (riwayatTab && riwayatTab.style.display !== 'none') renderHistory();
-}
-
-// ====== Riwayat (History) ======
-function renderHistory() {
-  let txs = getTx();
-  const fType = document.getElementById('riwayatType').value;
-  const fCat = document.getElementById('riwayatCat').value;
-
-  // Populate category filter dynamically
-  const allCats = [...new Set(getTx().map(t => t.cat))].sort();
-  const catSel = document.getElementById('riwayatCat');
-  const curCat = catSel.value;
-  catSel.innerHTML = '<option value="all">Semua Kategori</option>' +
-    allCats.map(c => `<option value="${c}"${c === curCat ? ' selected' : ''}>${c}</option>`).join('');
-
-  // Apply filters
-  if (fType !== 'all') txs = txs.filter(t => t.type === fType);
-  if (fCat !== 'all') txs = txs.filter(t => t.cat === fCat);
-
-  // Summary strip
-  const income  = txs.filter(t => t.type === 'income').reduce((a,t) => a + t.amount, 0);
-  const expense = txs.filter(t => t.type === 'expense').reduce((a,t) => a + t.amount, 0);
-  const net = income - expense;
-  document.getElementById('riwayatSummary').innerHTML = [
-    { label:'Pemasukan', val:'+ Rp ' + fmt(income), color:'var(--accent3)', bg:'rgba(52,211,153,0.08)', border:'var(--accent3)' },
-    { label:'Pengeluaran', val:'- Rp ' + fmt(expense), color:'var(--danger)', bg:'rgba(248,113,113,0.08)', border:'var(--danger)' },
-    { label:'Saldo', val:(net>=0?'+ ':'- ')+'Rp '+fmt(Math.abs(net)), color:net>=0?'var(--accent)':'var(--danger)', bg:net>=0?'rgba(108,99,255,0.08)':'rgba(248,113,113,0.08)', border:net>=0?'var(--accent)':'var(--danger)' },
-    { label:'Total Transaksi', val: txs.length + ' transaksi', color:'var(--text2)', bg:'var(--bg3)', border:'var(--border2)' },
-  ].map(s => `<div style="background:${s.bg};border:1px solid ${s.border};border-radius:var(--r2);padding:12px 14px">
-    <p style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px">${s.label}</p>
-    <p style="font-size:14px;font-weight:700;font-family:var(--mono);color:${s.color}">${s.val}</p>
-  </div>`).join('');
-
-  const el = document.getElementById('riwayatList');
-  if (!txs.length) {
-    el.innerHTML = '<div style="text-align:center;padding:60px 20px;color:var(--text3)"><p style="font-size:32px;margin-bottom:12px">📭</p><p>Tidak ada transaksi ditemukan</p></div>';
-    return;
-  }
-
-  // Group by month
-  const groups = {};
-  txs.forEach(t => {
-    const m = t.date.substring(0, 7);
-    if (!groups[m]) groups[m] = { txs: [], income: 0, expense: 0 };
-    groups[m].txs.push(t);
-    groups[m][t.type] += t.amount;
-  });
-
-  const sortedMonths = Object.keys(groups).sort().reverse();
-  el.innerHTML = sortedMonths.map(m => {
-    const g = groups[m];
-    const [yr, mo] = m.split('-');
-    const monthLabel = new Date(yr, mo-1).toLocaleDateString('id-ID', { month:'long', year:'numeric' });
-    const netM = g.income - g.expense;
-    return `<div class="history-month-group">
-      <div class="history-month-label">
-        <span>📅 ${monthLabel}</span>
-        <span style="font-size:11px;color:${netM>=0?'var(--accent3)':'var(--danger)'};font-family:var(--mono)">${netM>=0?'+':'-'} Rp ${fmt(Math.abs(netM))}</span>
-      </div>
-      ${g.txs.map(t => {
-        const d = new Date(t.date).toLocaleDateString('id-ID',{day:'2-digit',month:'short'});
-        return `<div class="history-item ${t.type}">
-          <span class="hist-date">${d}</span>
-          <div class="hist-info">
-            <div class="hist-desc">${t.desc}</div>
-            <div class="hist-meta">
-              <span class="${t.type==='income'?'tag-income':'tag-expense'}" style="font-size:10px;padding:1px 7px">${t.type==='income'?'Pemasukan':'Pengeluaran'}</span>
-              <span class="badge-cat">🏷 ${t.cat}</span>
-            </div>
-          </div>
-          <span class="hist-amt" style="color:${t.type==='income'?'var(--accent3)':'var(--danger)'}">${t.type==='income'?'+':'-'}Rp ${fmt(t.amount)}</span>
-          <button onclick="openEditModal(${t.id})" class="btn-edit" style="flex-shrink:0">✏</button>
-        </div>`;
-      }).join('')}
-    </div>`;
-  }).join('');
+  const dateFile = new Date().toISOString().split('T')[0];
+  doc.save(`FINANKU_${currentUser}_${dateFile}.pdf`);
+  toast('File PDF berhasil diunduh! 📄');
 }
 
 // ====== Keyboard Events ======
