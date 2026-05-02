@@ -652,6 +652,10 @@
   <button class="install-dismiss" onclick="dismissInstall()">✕</button>
 </div>
 
+<!-- Firebase SDK (Compat v10) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
 <!-- Scripts -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -659,13 +663,35 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
 <script>
+// ====================================================
+// ██████╗ ██╗ ██████╗ ███████╗██████╗  █████╗ ███████╗███████╗
+// FINANKU — Firebase Cross-Device Sync Edition
+// ====================================================
+
+// ============================================================
+// ⚡ LANGKAH 1: ISI FIREBASE CONFIG LO DI SINI
+// Ambil dari Firebase Console → Project Settings → Your Apps
+// ============================================================
+const firebaseConfig = {
+  apiKey: "AIzaSyCUj0cmGwLhsYgRC9QWYYmmzylTjnKv1fU",
+  authDomain: "finanku-a919d.firebaseapp.com",
+  projectId: "finanku-a919d",
+  storageBucket: "finanku-a919d.firebasestorage.app",
+  messagingSenderId: "96887762994",
+  appId: "1:96887762994:web:4436cec94942b1b8bc4c2b",
+  measurementId: "G-EK8M6CXSNP"
+};
+
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
 // ====== PWA Install Logic ======
 let deferredInstallPrompt = null;
 
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   deferredInstallPrompt = e;
-  // Tunda banner 3 detik biar tidak langsung muncul
   if (!localStorage.getItem('finanku_install_dismissed')) {
     setTimeout(() => {
       document.getElementById('installBanner').classList.add('show');
@@ -705,7 +731,6 @@ function isInStandaloneMode() {
     window.matchMedia('(display-mode: standalone)').matches;
 }
 
-// Tampilkan hint iOS jika belum di-install
 window.addEventListener('load', () => {
   if (isIOS() && !isInStandaloneMode()) {
     document.getElementById('iosHint').style.display = 'block';
@@ -723,22 +748,31 @@ if ('serviceWorker' in navigator) {
 
 // ====== App State ======
 let currentUser = null;
+let currentUserData = null;   // ← cache in-memory, supaya read tetap cepat
 let trendChartInst = null;
 let catChartInst = null;
-let addTypeState = 'income'; // for mobile add tab
+let addTypeState = 'income';
 
-// ====== Storage ======
-function getUsers(){return JSON.parse(localStorage.getItem('finanku_users')||'{}')}
-function saveUsers(u){localStorage.setItem('finanku_users',JSON.stringify(u))}
-function getTx(){
-  const users=getUsers();
-  return (users[currentUser]&&users[currentUser].transactions)||[];
+// ====== Firebase Helpers ======
+async function getUserDoc(username) {
+  const snap = await db.collection('users').doc(username).get();
+  return snap.exists ? snap.data() : null;
 }
-function saveTx(txs){
-  const users=getUsers();
-  if(!users[currentUser])users[currentUser]={};
-  users[currentUser].transactions=txs;
-  saveUsers(users);
+
+async function saveUserDoc(username, data) {
+  await db.collection('users').doc(username).set(data);
+}
+
+// ====== Storage (Firestore + Cache) ======
+// getTx() tetap SINKRON — baca dari cache di memori (cepat!)
+function getTx() {
+  return (currentUserData && currentUserData.transactions) || [];
+}
+
+// saveTx() ASYNC — tulis ke cache + Firestore (cross-device!)
+async function saveTx(txs) {
+  currentUserData.transactions = txs;
+  await saveUserDoc(currentUser, currentUserData);
 }
 
 // ====== Toast ======
@@ -763,36 +797,47 @@ function togglePass(inputId, btnId) {
 }
 
 // ====== Auth ======
-function doLogin() {
+async function doLogin() {
   const u = document.getElementById('loginUser').value.trim();
   const p = document.getElementById('loginPass').value;
   if (!u || !p) { toast('Isi semua field', true); return; }
-  const users = getUsers();
-  if (!users[u]) { toast('Akun tidak ditemukan', true); return; }
-  if (users[u].password !== btoa(p)) { toast('Kata sandi salah', true); return; }
-  currentUser = u;
-  showApp(users[u].name || u);
+  toast('Masuk...');
+  try {
+    const userData = await getUserDoc(u);
+    if (!userData) { toast('Akun tidak ditemukan', true); return; }
+    if (userData.password !== btoa(p)) { toast('Kata sandi salah', true); return; }
+    currentUser = u;
+    currentUserData = userData;
+    showApp(userData.name || u);
+  } catch(e) {
+    console.error(e);
+    toast('Gagal terhubung. Cek koneksi internet.', true);
+  }
 }
 
 function showRegister() { document.getElementById('registerModal').classList.add('open'); }
 function closeRegister() { document.getElementById('registerModal').classList.remove('open'); }
 
-function doRegister() {
+async function doRegister() {
   const name = document.getElementById('regName').value.trim();
-  const u = document.getElementById('regUser').value.trim();
-  const p = document.getElementById('regPass').value;
+  const u    = document.getElementById('regUser').value.trim();
+  const p    = document.getElementById('regPass').value;
   const secQ = document.getElementById('regSecQ').value;
   const secA = document.getElementById('regSecA').value.trim();
   if (!name || !u || !p) { toast('Isi semua field pendaftaran', true); return; }
-  if (p.length < 4) { toast('Kata sandi min. 4 karakter', true); return; }
-  if (!secA) { toast('Isi jawaban pertanyaan keamanan', true); return; }
-  const users = getUsers();
-  if (users[u]) { toast('Nama pengguna sudah digunakan', true); return; }
-  users[u] = { name, password: btoa(p), transactions: [], secQ, secA: secA.toLowerCase().trim() };
-  saveUsers(users);
-  closeRegister();
-  toast('Akun berhasil dibuat! Silakan masuk.');
-  document.getElementById('loginUser').value = u;
+  if (p.length < 4)      { toast('Kata sandi min. 4 karakter', true); return; }
+  if (!secA)             { toast('Isi jawaban pertanyaan keamanan', true); return; }
+  try {
+    const existing = await getUserDoc(u);
+    if (existing) { toast('Nama pengguna sudah digunakan', true); return; }
+    await saveUserDoc(u, { name, password: btoa(p), transactions: [], secQ, secA: secA.toLowerCase().trim() });
+    closeRegister();
+    toast('Akun berhasil dibuat! Silakan masuk. ✓');
+    document.getElementById('loginUser').value = u;
+  } catch(e) {
+    console.error(e);
+    toast('Gagal mendaftar. Cek koneksi internet.', true);
+  }
 }
 
 // ====== Forgot Password ======
@@ -805,39 +850,73 @@ function showForgotPass() {
   document.getElementById('forgotModal').classList.add('open');
 }
 function closeForgotPass() { document.getElementById('forgotModal').classList.remove('open'); }
-function fpNextStep() {
+
+async function fpNextStep() {
   const u = document.getElementById('fpUser').value.trim();
   if (!u) { toast('Masukkan nama pengguna', true); return; }
-  const users = getUsers();
-  if (!users[u]) { toast('Akun tidak ditemukan', true); return; }
-  if (!users[u].secQ) { toast('Akun ini tidak memiliki pertanyaan keamanan', true); return; }
-  document.getElementById('fpQuestion').textContent = users[u].secQ;
-  document.getElementById('fpStep1').style.display = 'none';
-  document.getElementById('fpStep2').style.display = '';
+  try {
+    const userData = await getUserDoc(u);
+    if (!userData)      { toast('Akun tidak ditemukan', true); return; }
+    if (!userData.secQ) { toast('Akun ini tidak memiliki pertanyaan keamanan', true); return; }
+    document.getElementById('fpQuestion').textContent = users[u].secQ;
+    document.getElementById('fpStep1').style.display = 'none';
+    document.getElementById('fpStep2').style.display = '';
+    // simpan sementara untuk step 2
+    fpCurrentUser = u;
+    fpCurrentData = userData;
+  } catch(e) {
+    toast('Gagal terhubung. Cek koneksi internet.', true);
+  }
 }
+let fpCurrentUser = null;
+let fpCurrentData = null;
+
+// patch fpNextStep yang bener (fix reference bug di atas)
+async function fpNextStep() {
+  const u = document.getElementById('fpUser').value.trim();
+  if (!u) { toast('Masukkan nama pengguna', true); return; }
+  try {
+    const userData = await getUserDoc(u);
+    if (!userData)      { toast('Akun tidak ditemukan', true); return; }
+    if (!userData.secQ) { toast('Akun ini tidak memiliki pertanyaan keamanan', true); return; }
+    document.getElementById('fpQuestion').textContent = userData.secQ;
+    document.getElementById('fpStep1').style.display = 'none';
+    document.getElementById('fpStep2').style.display = '';
+    fpCurrentUser = u;
+    fpCurrentData = userData;
+  } catch(e) {
+    toast('Gagal terhubung. Cek koneksi internet.', true);
+  }
+}
+
 function fpBackStep() {
   document.getElementById('fpStep1').style.display = '';
   document.getElementById('fpStep2').style.display = 'none';
 }
-function fpReset() {
-  const u = document.getElementById('fpUser').value.trim();
-  const ans = document.getElementById('fpAnswer').value.trim().toLowerCase();
+
+async function fpReset() {
+  const u      = fpCurrentUser;
+  const ans    = document.getElementById('fpAnswer').value.trim().toLowerCase();
   const newPass = document.getElementById('fpNewPass').value;
-  if (!ans) { toast('Masukkan jawaban', true); return; }
+  if (!ans)                          { toast('Masukkan jawaban', true); return; }
   if (!newPass || newPass.length < 4) { toast('Kata sandi baru min. 4 karakter', true); return; }
-  const users = getUsers();
-  if (!users[u]) { toast('Akun tidak ditemukan', true); return; }
-  if (users[u].secA !== ans) { toast('Jawaban salah, coba lagi', true); return; }
-  users[u].password = btoa(newPass);
-  saveUsers(users);
-  closeForgotPass();
-  toast('Kata sandi berhasil direset! Silakan masuk. ✓');
-  document.getElementById('loginUser').value = u;
-  document.getElementById('loginPass').value = '';
+  if (!fpCurrentData)                { toast('Ulangi dari langkah 1', true); return; }
+  if (fpCurrentData.secA !== ans)    { toast('Jawaban salah, coba lagi', true); return; }
+  try {
+    fpCurrentData.password = btoa(newPass);
+    await saveUserDoc(u, fpCurrentData);
+    closeForgotPass();
+    toast('Kata sandi berhasil direset! Silakan masuk. ✓');
+    document.getElementById('loginUser').value = u;
+    document.getElementById('loginPass').value = '';
+  } catch(e) {
+    toast('Gagal menyimpan. Cek koneksi.', true);
+  }
 }
 
 function doLogout() {
   currentUser = null;
+  currentUserData = null;   // ← bersihkan cache
   document.getElementById('loginScreen').style.display = 'flex';
   document.getElementById('loginScreen').classList.add('active');
   document.getElementById('appScreen').style.display = 'none';
@@ -865,18 +944,13 @@ function showApp(name) {
 function switchTab(tab) {
   document.querySelectorAll('.tab-content').forEach(t => { t.style.display = 'none'; });
   document.getElementById('tab-' + tab).style.display = 'block';
-
-  // Desktop nav
   document.querySelectorAll('.nav-btn').forEach(b => {
     b.style.background = b.dataset.tab === tab ? 'var(--bg3)' : '';
     b.style.color = b.dataset.tab === tab ? 'var(--text)' : '';
   });
-
-  // Mobile bottom nav
   document.querySelectorAll('.bnav-btn').forEach(b => {
     b.classList.toggle('active', b.dataset.tab === tab);
   });
-
   if (tab === 'stats') renderCharts();
   if (tab === 'transactions') renderTransactions();
   if (tab === 'riwayat') renderHistory();
@@ -904,19 +978,19 @@ function setAddType(type) {
   }
 }
 
-function addTransactionMobile() {
-  const type = addTypeState;
-  const desc = document.getElementById('aDesc').value.trim();
+async function addTransactionMobile() {
+  const type   = addTypeState;
+  const desc   = document.getElementById('aDesc').value.trim();
   const amount = parseFloat(document.getElementById('aAmount').value);
-  const cat = getCatValue('a');
-  const date = document.getElementById('aDate').value;
-  if (!desc) { toast('Isi keterangan transaksi', true); return; }
+  const cat    = getCatValue('a');
+  const date   = document.getElementById('aDate').value;
+  if (!desc)             { toast('Isi keterangan transaksi', true); return; }
   if (!amount || amount <= 0) { toast('Jumlah harus lebih dari 0', true); return; }
-  if (!date) { toast('Pilih tanggal', true); return; }
+  if (!date)             { toast('Pilih tanggal', true); return; }
   if (cat === 'Lainnya') { toast('Tulis nama kategori dulu', true); return; }
   const txs = getTx();
   txs.unshift({ id: Date.now(), type, desc, amount, cat, date });
-  saveTx(txs);
+  await saveTx(txs);
   document.getElementById('aDesc').value = '';
   document.getElementById('aAmount').value = '';
   document.getElementById('aCatCustom').value = '';
@@ -928,19 +1002,19 @@ function addTransactionMobile() {
 }
 
 // ====== Transactions ======
-function addTransaction() {
-  const type = document.getElementById('qType').value;
-  const desc = document.getElementById('qDesc').value.trim();
+async function addTransaction() {
+  const type   = document.getElementById('qType').value;
+  const desc   = document.getElementById('qDesc').value.trim();
   const amount = parseFloat(document.getElementById('qAmount').value);
-  const cat = getCatValue('q');
-  const date = document.getElementById('qDate').value;
-  if (!desc) { toast('Isi keterangan transaksi', true); return; }
+  const cat    = getCatValue('q');
+  const date   = document.getElementById('qDate').value;
+  if (!desc)             { toast('Isi keterangan transaksi', true); return; }
   if (!amount || amount <= 0) { toast('Jumlah harus lebih dari 0', true); return; }
-  if (!date) { toast('Pilih tanggal', true); return; }
+  if (!date)             { toast('Pilih tanggal', true); return; }
   if (cat === 'Lainnya') { toast('Tulis nama kategori dulu', true); return; }
   const txs = getTx();
   txs.unshift({ id: Date.now(), type, desc, amount, cat, date });
-  saveTx(txs);
+  await saveTx(txs);
   document.getElementById('qDesc').value = '';
   document.getElementById('qAmount').value = '';
   document.getElementById('qCatCustom').value = '';
@@ -950,25 +1024,25 @@ function addTransaction() {
   refreshAll();
 }
 
-function deleteTransaction(id) {
+async function deleteTransaction(id) {
   if (!confirm('Hapus transaksi ini?')) return;
   const txs = getTx().filter(t => t.id !== id);
-  saveTx(txs);
+  await saveTx(txs);
   toast('Transaksi dihapus');
   refreshAll();
   renderTransactions();
 }
 
 function refreshAll() {
-  const txs = getTx();
-  const income = txs.filter(t => t.type === 'income').reduce((a, t) => a + t.amount, 0);
+  const txs    = getTx();
+  const income  = txs.filter(t => t.type === 'income').reduce((a, t) => a + t.amount, 0);
   const expense = txs.filter(t => t.type === 'expense').reduce((a, t) => a + t.amount, 0);
-  const net = income - expense;
-  document.getElementById('totalIncome').textContent = 'Rp ' + fmt(income);
+  const net     = income - expense;
+  document.getElementById('totalIncome').textContent  = 'Rp ' + fmt(income);
   document.getElementById('totalExpense').textContent = 'Rp ' + fmt(expense);
   const nb = document.getElementById('netBalance');
-  nb.textContent = 'Rp ' + fmt(Math.abs(net));
-  nb.style.color = net >= 0 ? 'var(--accent)' : 'var(--danger)';
+  nb.textContent  = 'Rp ' + fmt(Math.abs(net));
+  nb.style.color  = net >= 0 ? 'var(--accent)' : 'var(--danger)';
   document.getElementById('totalTrx').textContent = txs.length;
   renderRecent(txs.slice(0, 8));
 }
@@ -1007,14 +1081,14 @@ function renderRecent(txs) {
 
 function renderTransactions() {
   const fType = document.getElementById('filterType').value;
-  const fCat = document.getElementById('filterCat').value;
-  let txs = getTx();
-  const cats = [...new Set(txs.map(t => t.cat))];
+  const fCat  = document.getElementById('filterCat').value;
+  let txs     = getTx();
+  const cats  = [...new Set(txs.map(t => t.cat))];
   const catSel = document.getElementById('filterCat');
   const curCat = catSel.value;
   catSel.innerHTML = '<option value="all">Semua Kategori</option>' + cats.map(c => `<option value="${c}"${c === curCat ? ' selected' : ''}>${c}</option>`).join('');
   if (fType !== 'all') txs = txs.filter(t => t.type === fType);
-  if (fCat !== 'all') txs = txs.filter(t => t.cat === fCat);
+  if (fCat  !== 'all') txs = txs.filter(t => t.cat === fCat);
   const el = document.getElementById('transactionTable');
   if (!txs.length) { el.innerHTML = '<p style="text-align:center;color:var(--text2);padding:40px;font-size:13px">Tidak ada transaksi</p>'; return; }
   el.innerHTML = `<table style="width:100%;border-collapse:collapse">
@@ -1045,17 +1119,17 @@ function renderTrendChart(txs) {
     if (!months[m]) months[m] = { income: 0, expense: 0 };
     months[m][t.type] += t.amount;
   });
-  const labels = Object.keys(months).sort().slice(-6);
-  const incomes = labels.map(m => months[m].income || 0);
+  const labels   = Object.keys(months).sort().slice(-6);
+  const incomes  = labels.map(m => months[m].income || 0);
   const expenses = labels.map(m => months[m].expense || 0);
-  const lblFmt = labels.map(m => { const [y, mo] = m.split('-'); return new Date(y, mo - 1).toLocaleDateString('id-ID', { month: 'short', year: '2-digit' }); });
+  const lblFmt   = labels.map(m => { const [y, mo] = m.split('-'); return new Date(y, mo - 1).toLocaleDateString('id-ID', { month: 'short', year: '2-digit' }); });
   const ctx = document.getElementById('trendChart').getContext('2d');
   if (trendChartInst) trendChartInst.destroy();
   trendChartInst = new Chart(ctx, {
     type: 'bar',
     data: {
       labels: lblFmt, datasets: [
-        { label: 'Pemasukan', data: incomes, backgroundColor: 'rgba(52,211,153,0.7)', borderRadius: 4 },
+        { label: 'Pemasukan',   data: incomes,  backgroundColor: 'rgba(52,211,153,0.7)', borderRadius: 4 },
         { label: 'Pengeluaran', data: expenses, backgroundColor: 'rgba(248,113,113,0.7)', borderRadius: 4 }
       ]
     },
@@ -1064,19 +1138,19 @@ function renderTrendChart(txs) {
       plugins: { legend: { display: true, labels: { color: '#9ca3c4', font: { size: 11 }, boxWidth: 10 } } },
       scales: {
         x: { ticks: { color: '#9ca3c4', font: { size: 11 } }, grid: { color: 'rgba(255,255,255,0.04)' } },
-        y: { ticks: { color: '#9ca3c4', font: { size: 11 }, callback: v => v >= 1e6 ? (v / 1e6).toFixed(1) + 'jt' : v >= 1e3 ? (v / 1e3).toFixed(0) + 'rb' : v }, grid: { color: 'rgba(255,255,255,0.04)' } }
+        y: { ticks: { color: '#9ca3c4', font: { size: 11 }, callback: v => v >= 1e6 ? (v/1e6).toFixed(1)+'jt' : v >= 1e3 ? (v/1e3).toFixed(0)+'rb' : v }, grid: { color: 'rgba(255,255,255,0.04)' } }
       }
     }
   });
 }
 
 function renderCatChart(txs) {
-  const cats = {};
+  const cats   = {};
   txs.filter(t => t.type === 'expense').forEach(t => { cats[t.cat] = (cats[t.cat] || 0) + t.amount; });
   const labels = Object.keys(cats);
-  const data = Object.values(cats);
-  const colors = ['#6c63ff', '#f87171', '#34d399', '#fbbf24', '#a78bfa', '#60a5fa', '#fb923c', '#f472b6', '#4ade80', '#e879f9'];
-  const ctx = document.getElementById('catChart').getContext('2d');
+  const data   = Object.values(cats);
+  const colors = ['#6c63ff','#f87171','#34d399','#fbbf24','#a78bfa','#60a5fa','#fb923c','#f472b6','#4ade80','#e879f9'];
+  const ctx    = document.getElementById('catChart').getContext('2d');
   if (catChartInst) catChartInst.destroy();
   if (!labels.length) { ctx.clearRect(0, 0, 999, 999); return; }
   catChartInst = new Chart(ctx, {
@@ -1092,7 +1166,7 @@ function renderCatSummary(txs) {
     if (!cats[t.cat]) cats[t.cat] = { income: 0, expense: 0 };
     cats[t.cat][t.type] += t.amount;
   });
-  const el = document.getElementById('catSummary');
+  const el   = document.getElementById('catSummary');
   const rows = Object.entries(cats).sort((a, b) => (b[1].income + b[1].expense) - (a[1].income + a[1].expense));
   el.innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px">
     ${rows.map(([cat, v]) => `
@@ -1112,8 +1186,6 @@ async function exportXLSX() {
   const wb = new ExcelJS.Workbook();
   wb.creator = 'FINANKU';
   wb.created = new Date();
-
-  // ---- Sheet 1: Transaksi ----
   const ws = wb.addWorksheet('Transaksi');
   ws.columns = [
     { header: 'Tanggal',      key: 'date',   width: 16 },
@@ -1122,59 +1194,39 @@ async function exportXLSX() {
     { header: 'Kategori',     key: 'cat',    width: 18 },
     { header: 'Jumlah (Rp)', key: 'amount', width: 20 },
   ];
-
-  const thinBlack = { style: 'thin', color: { argb: 'FF000000' } };
-  const borderAll = { top: thinBlack, left: thinBlack, bottom: thinBlack, right: thinBlack };
-  // Blue header matching image: #4472C4
+  const thinBlack  = { style: 'thin', color: { argb: 'FF000000' } };
+  const borderAll  = { top: thinBlack, left: thinBlack, bottom: thinBlack, right: thinBlack };
   const headerFill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF4472C4' } };
-  // Pemasukan: green bg (#70AD47), Pengeluaran: red bg (#FF0000)
-  const incFill  = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF70AD47' } };
-  const expFill  = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFF0000' } };
-
-  // Header row
+  const incFill    = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF70AD47' } };
+  const expFill    = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFF0000' } };
   const hdr = ws.getRow(1);
   ['date','type','desc','cat','amount'].forEach((key, idx) => {
     const cell = hdr.getCell(idx + 1);
-    cell.fill = headerFill;
-    cell.font = { bold: true, color: { argb: 'FFFFFFFF' }, size: 11, name: 'Calibri' };
+    cell.fill   = headerFill;
+    cell.font   = { bold: true, color: { argb: 'FFFFFFFF' }, size: 11, name: 'Calibri' };
     cell.border = borderAll;
-    cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: false };
+    cell.alignment = { vertical: 'middle', horizontal: 'center' };
   });
   hdr.height = 20;
-
-  // Data rows
-  txs.forEach((t) => {
+  txs.forEach(t => {
     const isIncome = t.type === 'income';
-    const row = ws.addRow({
-      date: t.date,
-      type: t.type === 'income' ? 'Pemasukan' : 'Pengeluaran',
-      desc: t.desc,
-      cat: t.cat,
-      amount: t.amount,
-    });
+    const row = ws.addRow({ date: t.date, type: t.type === 'income' ? 'Pemasukan' : 'Pengeluaran', desc: t.desc, cat: t.cat, amount: t.amount });
     row.height = 18;
-    row.eachCell(cell => {
-      cell.border = borderAll;
-      cell.font = { name: 'Calibri', size: 11, color: { argb: 'FF000000' } };
-      cell.alignment = { vertical: 'middle' };
-    });
-    // Jenis cell: colored background + white bold text
+    row.eachCell(cell => { cell.border = borderAll; cell.font = { name: 'Calibri', size: 11 }; cell.alignment = { vertical: 'middle' }; });
     const typeCell = row.getCell('type');
-    typeCell.fill = isIncome ? incFill : expFill;
-    typeCell.font = { name: 'Calibri', size: 11, bold: true, color: { argb: 'FFFFFFFF' } };
+    typeCell.fill  = isIncome ? incFill : expFill;
+    typeCell.font  = { name: 'Calibri', size: 11, bold: true, color: { argb: 'FFFFFFFF' } };
     typeCell.alignment = { vertical: 'middle', horizontal: 'center' };
-    // Amount cell: right-aligned, red color for expense
-    const amtCell = row.getCell('amount');
+    const amtCell  = row.getCell('amount');
     amtCell.numFmt = '#,##0';
-    amtCell.font = { name: 'Calibri', size: 11, bold: true, color: { argb: isIncome ? 'FF70AD47' : 'FFFF0000' } };
+    amtCell.font   = { name: 'Calibri', size: 11, bold: true, color: { argb: isIncome ? 'FF70AD47' : 'FFFF0000' } };
     amtCell.alignment = { horizontal: 'right', vertical: 'middle' };
   });
-
-  const date = new Date().toISOString().split('T')[0];
+  const date   = new Date().toISOString().split('T')[0];
   const buffer = await wb.xlsx.writeBuffer();
-  const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
+  const blob   = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  const url    = URL.createObjectURL(blob);
+  const a      = document.createElement('a');
   a.href = url; a.download = `FINANKU_${currentUser}_${date}.xlsx`; a.click();
   URL.revokeObjectURL(url);
   toast('File Excel berhasil diunduh! 📊');
@@ -1188,95 +1240,49 @@ function exportPDF() {
   const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
   const income  = txs.filter(t=>t.type==='income').reduce((a,t)=>a+t.amount,0);
   const expense = txs.filter(t=>t.type==='expense').reduce((a,t)=>a+t.amount,0);
-  const net = income - expense;
-  const today = new Date().toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'});
-
-  // White background
-  doc.setFillColor(255, 255, 255);
-  doc.rect(0, 0, 297, 210, 'F');
-
-  // Green header bar (matching image: bright green #4CAF50-ish)
-  doc.setFillColor(76, 175, 80);
-  doc.rect(0, 0, 297, 24, 'F');
-  doc.setTextColor(255, 255, 255);
-  doc.setFontSize(16); doc.setFont('helvetica','bold');
+  const net     = income - expense;
+  const today   = new Date().toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'});
+  doc.setFillColor(255,255,255); doc.rect(0,0,297,210,'F');
+  doc.setFillColor(76,175,80); doc.rect(0,0,297,24,'F');
+  doc.setTextColor(255,255,255); doc.setFontSize(16); doc.setFont('helvetica','bold');
   doc.text('FINANKU — Laporan Keuangan', 148, 11, { align: 'center' });
   doc.setFontSize(9); doc.setFont('helvetica','normal');
   doc.text(`Pengguna: ${currentUser}   |   Diekspor: ${today}`, 148, 18, { align: 'center' });
-
-  // Summary boxes — light background, dark text
   const boxes = [
-    { label: 'Total Pemasukan',  val: 'Rp ' + fmt(income),         bg: [13,61,45],   fg: [52,211,153],  lbg:[230,245,235], lfg:[30,100,50] },
-    { label: 'Total Pengeluaran',val: 'Rp ' + fmt(expense),        bg: [61,13,13],   fg: [220,50,50],   lbg:[245,230,230], lfg:[150,20,20] },
-    { label: 'Saldo Bersih',     val: 'Rp ' + fmt(Math.abs(net)),  bg: [10,15,40],   fg: [108,99,255],  lbg:[235,233,255], lfg:[60,50,180] },
-    { label: 'Jml Transaksi',    val: txs.length + ' transaksi',   bg: [26,29,39],   fg: [130,100,200], lbg:[240,237,255], lfg:[80,60,180] },
+    { label: 'Total Pemasukan',  val: 'Rp ' + fmt(income),        lbg:[230,245,235], lfg:[30,100,50] },
+    { label: 'Total Pengeluaran',val: 'Rp ' + fmt(expense),       lbg:[245,230,230], lfg:[150,20,20] },
+    { label: 'Saldo Bersih',     val: 'Rp ' + fmt(Math.abs(net)), lbg:[235,233,255], lfg:[60,50,180] },
+    { label: 'Jml Transaksi',    val: txs.length + ' transaksi',  lbg:[240,237,255], lfg:[80,60,180] },
   ];
   boxes.forEach((b, i) => {
     const x = 14 + i * 68;
-    // Light box
-    doc.setFillColor(...b.lbg);
-    doc.roundedRect(x, 28, 64, 18, 2, 2, 'F');
-    // Border
-    doc.setDrawColor(200, 200, 200);
-    doc.setLineWidth(0.3);
-    doc.roundedRect(x, 28, 64, 18, 2, 2, 'S');
-    doc.setFontSize(7.5); doc.setFont('helvetica','normal');
-    doc.setTextColor(100, 100, 100);
+    doc.setFillColor(...b.lbg); doc.roundedRect(x,28,64,18,2,2,'F');
+    doc.setDrawColor(200,200,200); doc.setLineWidth(0.3); doc.roundedRect(x,28,64,18,2,2,'S');
+    doc.setFontSize(7.5); doc.setFont('helvetica','normal'); doc.setTextColor(100,100,100);
     doc.text(b.label, x+4, 34);
-    doc.setFontSize(11); doc.setFont('helvetica','bold');
-    doc.setTextColor(...b.lfg);
+    doc.setFontSize(11); doc.setFont('helvetica','bold'); doc.setTextColor(...b.lfg);
     doc.text(b.val, x+4, 42);
   });
-
-  // Table
-  const rows = txs.map(t => [
-    t.date,
-    t.type === 'income' ? 'Pemasukan' : 'Pengeluaran',
-    t.desc,
-    t.cat,
-    (t.type==='income' ? '+ Rp ' : '- Rp ') + fmt(t.amount),
-  ]);
-
+  const rows = txs.map(t => [t.date, t.type==='income'?'Pemasukan':'Pengeluaran', t.desc, t.cat, (t.type==='income'?'+ Rp ':'- Rp ')+fmt(t.amount)]);
   doc.autoTable({
     startY: 52,
-    head: [['Tanggal', 'Jenis', 'Keterangan', 'Kategori', 'Jumlah (Rp)']],
-    body: rows,
-    theme: 'grid',
-    styles: { fontSize: 9, cellPadding: 3, textColor: [30,30,30], lineColor: [180,180,180], lineWidth: 0.3, font: 'helvetica', fillColor: [255,255,255] },
-    headStyles: { fillColor: [70,130,200], textColor: [255,255,255], fontStyle: 'bold', fontSize: 9, halign: 'center' },
-    alternateRowStyles: { fillColor: [240,245,255] },
-    bodyStyles: { fillColor: [255,255,255], textColor: [30,30,30] },
-    columnStyles: {
-      0: { cellWidth: 26 },
-      1: { cellWidth: 28, halign: 'center' },
-      2: { cellWidth: 90 },
-      3: { cellWidth: 32 },
-      4: { cellWidth: 42, halign: 'right' },
-    },
+    head: [['Tanggal','Jenis','Keterangan','Kategori','Jumlah (Rp)']],
+    body: rows, theme: 'grid',
+    styles: { fontSize:9, cellPadding:3, textColor:[30,30,30], lineColor:[180,180,180], lineWidth:0.3, font:'helvetica', fillColor:[255,255,255] },
+    headStyles: { fillColor:[70,130,200], textColor:[255,255,255], fontStyle:'bold', fontSize:9, halign:'center' },
+    alternateRowStyles: { fillColor:[240,245,255] },
+    columnStyles: { 0:{cellWidth:26}, 1:{cellWidth:28,halign:'center'}, 2:{cellWidth:90}, 3:{cellWidth:32}, 4:{cellWidth:42,halign:'right'} },
     didParseCell(data) {
-      if (data.section === 'body' && data.column.index === 1) {
-        const isInc = data.cell.raw === 'Pemasukan';
-        data.cell.styles.textColor = isInc ? [34,139,34] : [200,30,30];
-        data.cell.styles.fontStyle = 'bold';
-      }
-      if (data.section === 'body' && data.column.index === 4) {
-        const isInc = data.cell.raw.startsWith('+');
-        data.cell.styles.textColor = isInc ? [34,139,34] : [200,30,30];
-        data.cell.styles.fontStyle = 'bold';
-      }
+      if (data.section==='body' && data.column.index===1) { data.cell.styles.textColor = data.cell.raw==='Pemasukan'?[34,139,34]:[200,30,30]; data.cell.styles.fontStyle='bold'; }
+      if (data.section==='body' && data.column.index===4) { data.cell.styles.textColor = data.cell.raw.startsWith('+')?[34,139,34]:[200,30,30]; data.cell.styles.fontStyle='bold'; }
     },
-    margin: { left: 14, right: 14 },
+    margin: { left:14, right:14 },
   });
-
-  // Footer
   const pageCount = doc.internal.getNumberOfPages();
-  for (let i = 1; i <= pageCount; i++) {
-    doc.setPage(i);
-    doc.setFontSize(7); doc.setFont('helvetica','normal');
-    doc.setTextColor(150,150,150);
-    doc.text(`FINANKU · Data tersimpan lokal di perangkat Anda · Halaman ${i} dari ${pageCount}`, 148, 205, { align: 'center' });
+  for (let i=1; i<=pageCount; i++) {
+    doc.setPage(i); doc.setFontSize(7); doc.setFont('helvetica','normal'); doc.setTextColor(150,150,150);
+    doc.text(`FINANKU · Tersinkron via Firebase · Halaman ${i} dari ${pageCount}`, 148, 205, { align:'center' });
   }
-
   const date = new Date().toISOString().split('T')[0];
   doc.save(`FINANKU_${currentUser}_${date}.pdf`);
   toast('PDF berhasil diunduh! 📄');
@@ -1286,16 +1292,11 @@ function exportPDF() {
 const STANDARD_CATS = ['Gaji','Bisnis','Investasi','Makanan','Transport','Belanja','Tagihan','Kesehatan','Hiburan','Lainnya'];
 
 function toggleCustomCat(prefix) {
-  const sel = document.getElementById(prefix + 'Cat');
+  const sel  = document.getElementById(prefix + 'Cat');
   const wrap = document.getElementById(prefix + 'CatCustomWrap');
-  const inp = document.getElementById(prefix + 'CatCustom');
-  if (sel.value === 'Lainnya') {
-    wrap.style.display = 'block';
-    inp.focus();
-  } else {
-    wrap.style.display = 'none';
-    inp.value = '';
-  }
+  const inp  = document.getElementById(prefix + 'CatCustom');
+  if (sel.value === 'Lainnya') { wrap.style.display = 'block'; inp.focus(); }
+  else { wrap.style.display = 'none'; inp.value = ''; }
 }
 
 function getCatValue(prefix) {
@@ -1313,14 +1314,12 @@ let editTypeState = 'income';
 function openEditModal(id) {
   const tx = getTx().find(t => t.id === id);
   if (!tx) return;
-  document.getElementById('editId').value = id;
-  document.getElementById('editDesc').value = tx.desc;
+  document.getElementById('editId').value    = id;
+  document.getElementById('editDesc').value  = tx.desc;
   document.getElementById('editAmount').value = tx.amount;
-  document.getElementById('editDate').value = tx.date;
-
-  // Category: check if standard or custom
-  const catSel = document.getElementById('editCat');
-  const isStandard = STANDARD_CATS.includes(tx.cat);
+  document.getElementById('editDate').value  = tx.date;
+  const catSel      = document.getElementById('editCat');
+  const isStandard  = STANDARD_CATS.includes(tx.cat);
   if (isStandard) {
     catSel.value = tx.cat;
     document.getElementById('editCatCustomWrap').style.display = 'none';
@@ -1330,8 +1329,6 @@ function openEditModal(id) {
     document.getElementById('editCatCustomWrap').style.display = 'block';
     document.getElementById('editCatCustom').value = tx.cat;
   }
-
-  // Type buttons
   setEditType(tx.type);
   document.getElementById('editModal').classList.add('open');
 }
@@ -1351,66 +1348,56 @@ function setEditType(type) {
   }
 }
 
-function saveEdit() {
-  const id = parseInt(document.getElementById('editId').value);
-  const desc = document.getElementById('editDesc').value.trim();
+async function saveEdit() {
+  const id     = parseInt(document.getElementById('editId').value);
+  const desc   = document.getElementById('editDesc').value.trim();
   const amount = parseFloat(document.getElementById('editAmount').value);
-  const cat = getCatValue('edit');
-  const date = document.getElementById('editDate').value;
-  const type = editTypeState;
-  if (!desc) { toast('Isi keterangan transaksi', true); return; }
+  const cat    = getCatValue('edit');
+  const date   = document.getElementById('editDate').value;
+  const type   = editTypeState;
+  if (!desc)             { toast('Isi keterangan transaksi', true); return; }
   if (!amount || amount <= 0) { toast('Jumlah harus lebih dari 0', true); return; }
-  if (!date) { toast('Pilih tanggal', true); return; }
+  if (!date)             { toast('Pilih tanggal', true); return; }
   if (cat === 'Lainnya') { toast('Tulis nama kategori dulu', true); return; }
   const txs = getTx().map(t => t.id === id ? { ...t, type, desc, amount, cat, date } : t);
-  saveTx(txs);
+  await saveTx(txs);
   closeEditModal();
   toast('Transaksi berhasil diperbarui! ✓');
   refreshAll();
   renderTransactions();
-  // Juga update riwayat jika sedang terbuka
   const riwayatTab = document.getElementById('tab-riwayat');
   if (riwayatTab && riwayatTab.style.display !== 'none') renderHistory();
 }
 
 // ====== Riwayat (History) ======
 function renderHistory() {
-  let txs = getTx();
+  let txs   = getTx();
   const fType = document.getElementById('riwayatType').value;
-  const fCat = document.getElementById('riwayatCat').value;
-
-  // Populate category filter dynamically
+  const fCat  = document.getElementById('riwayatCat').value;
   const allCats = [...new Set(getTx().map(t => t.cat))].sort();
-  const catSel = document.getElementById('riwayatCat');
-  const curCat = catSel.value;
+  const catSel  = document.getElementById('riwayatCat');
+  const curCat  = catSel.value;
   catSel.innerHTML = '<option value="all">Semua Kategori</option>' +
     allCats.map(c => `<option value="${c}"${c === curCat ? ' selected' : ''}>${c}</option>`).join('');
-
-  // Apply filters
   if (fType !== 'all') txs = txs.filter(t => t.type === fType);
-  if (fCat !== 'all') txs = txs.filter(t => t.cat === fCat);
-
-  // Summary strip
+  if (fCat  !== 'all') txs = txs.filter(t => t.cat === fCat);
   const income  = txs.filter(t => t.type === 'income').reduce((a,t) => a + t.amount, 0);
   const expense = txs.filter(t => t.type === 'expense').reduce((a,t) => a + t.amount, 0);
-  const net = income - expense;
+  const net     = income - expense;
   document.getElementById('riwayatSummary').innerHTML = [
-    { label:'Pemasukan', val:'+ Rp ' + fmt(income), color:'var(--accent3)', bg:'rgba(52,211,153,0.08)', border:'var(--accent3)' },
-    { label:'Pengeluaran', val:'- Rp ' + fmt(expense), color:'var(--danger)', bg:'rgba(248,113,113,0.08)', border:'var(--danger)' },
-    { label:'Saldo', val:(net>=0?'+ ':'- ')+'Rp '+fmt(Math.abs(net)), color:net>=0?'var(--accent)':'var(--danger)', bg:net>=0?'rgba(108,99,255,0.08)':'rgba(248,113,113,0.08)', border:net>=0?'var(--accent)':'var(--danger)' },
-    { label:'Total Transaksi', val: txs.length + ' transaksi', color:'var(--text2)', bg:'var(--bg3)', border:'var(--border2)' },
+    { label:'Pemasukan',       val:'+ Rp '+fmt(income),                   color:'var(--accent3)', bg:'rgba(52,211,153,0.08)',  border:'var(--accent3)' },
+    { label:'Pengeluaran',     val:'- Rp '+fmt(expense),                  color:'var(--danger)',  bg:'rgba(248,113,113,0.08)', border:'var(--danger)' },
+    { label:'Saldo',           val:(net>=0?'+ ':'- ')+'Rp '+fmt(Math.abs(net)), color:net>=0?'var(--accent)':'var(--danger)', bg:net>=0?'rgba(108,99,255,0.08)':'rgba(248,113,113,0.08)', border:net>=0?'var(--accent)':'var(--danger)' },
+    { label:'Total Transaksi', val:txs.length+' transaksi',               color:'var(--text2)',   bg:'var(--bg3)',             border:'var(--border2)' },
   ].map(s => `<div style="background:${s.bg};border:1px solid ${s.border};border-radius:var(--r2);padding:12px 14px">
     <p style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px">${s.label}</p>
     <p style="font-size:14px;font-weight:700;font-family:var(--mono);color:${s.color}">${s.val}</p>
   </div>`).join('');
-
   const el = document.getElementById('riwayatList');
   if (!txs.length) {
     el.innerHTML = '<div style="text-align:center;padding:60px 20px;color:var(--text3)"><p style="font-size:32px;margin-bottom:12px">📭</p><p>Tidak ada transaksi ditemukan</p></div>';
     return;
   }
-
-  // Group by month
   const groups = {};
   txs.forEach(t => {
     const m = t.date.substring(0, 7);
@@ -1418,7 +1405,6 @@ function renderHistory() {
     groups[m].txs.push(t);
     groups[m][t.type] += t.amount;
   });
-
   const sortedMonths = Object.keys(groups).sort().reverse();
   el.innerHTML = sortedMonths.map(m => {
     const g = groups[m];
