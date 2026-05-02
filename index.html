@@ -227,6 +227,10 @@
         <input type="text" id="regUser" placeholder="Buat nama pengguna" autocomplete="username">
       </div>
       <div>
+        <label style="font-size:12px;color:var(--text2);margin-bottom:6px;display:block">Email <span style="color:var(--text3)">(untuk reset sandi)</span></label>
+        <input type="email" id="regEmail" placeholder="contoh@gmail.com" autocomplete="email">
+      </div>
+      <div>
         <label style="font-size:12px;color:var(--text2);margin-bottom:6px;display:block">Kata Sandi</label>
         <div class="pass-wrap">
           <input type="password" id="regPass" placeholder="Buat kata sandi (min. 4 karakter)" autocomplete="new-password">
@@ -234,20 +238,6 @@
             <svg id="eyeRegPass-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
           </button>
         </div>
-      </div>
-      <div>
-        <label style="font-size:12px;color:var(--text2);margin-bottom:6px;display:block">Pertanyaan Keamanan <span style="color:var(--text3)">(untuk lupa sandi)</span></label>
-        <select id="regSecQ">
-          <option value="Nama hewan peliharaan pertama Anda?">Nama hewan peliharaan pertama Anda?</option>
-          <option value="Nama kota kelahiran Anda?">Nama kota kelahiran Anda?</option>
-          <option value="Nama SD tempat Anda belajar?">Nama SD tempat Anda belajar?</option>
-          <option value="Makanan favorit masa kecil Anda?">Makanan favorit masa kecil Anda?</option>
-          <option value="Nama panggilan Anda saat kecil?">Nama panggilan Anda saat kecil?</option>
-        </select>
-      </div>
-      <div>
-        <label style="font-size:12px;color:var(--text2);margin-bottom:6px;display:block">Jawaban Pertanyaan Keamanan</label>
-        <input type="text" id="regSecA" placeholder="Jawaban (tidak case-sensitive)" autocomplete="off">
       </div>
       <div style="display:flex;gap:10px;margin-top:4px">
         <button class="btn-ghost" onclick="closeRegister()" style="flex:1">Batal</button>
@@ -264,44 +254,15 @@
       <h2 style="font-size:18px;font-weight:600">Lupa Sandi</h2>
       <button onclick="closeForgotPass()" style="background:transparent;border:none;color:var(--text3);font-size:20px;cursor:pointer;padding:4px;line-height:1">✕</button>
     </div>
-    <!-- Step 1: Enter username -->
-    <div id="fpStep1">
-      <p style="font-size:13px;color:var(--text2);margin-bottom:16px">Masukkan nama pengguna Anda untuk melanjutkan pemulihan akun.</p>
-      <div style="display:flex;flex-direction:column;gap:14px">
-        <div>
-          <label style="font-size:12px;color:var(--text2);margin-bottom:6px;display:block">Nama Pengguna</label>
-          <input type="text" id="fpUser" placeholder="Masukkan nama pengguna" autocomplete="username">
-        </div>
-        <div style="display:flex;gap:10px">
-          <button class="btn-ghost" onclick="closeForgotPass()" style="flex:1">Batal</button>
-          <button class="btn-primary" onclick="fpNextStep()" style="flex:2">Lanjutkan →</button>
-        </div>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:16px">Masukkan email yang terdaftar. Kami akan mengirim link reset sandi ke email tersebut.</p>
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div>
+        <label style="font-size:12px;color:var(--text2);margin-bottom:6px;display:block">Email</label>
+        <input type="email" id="fpEmail" placeholder="contoh@gmail.com" autocomplete="email">
       </div>
-    </div>
-    <!-- Step 2: Security question + new password -->
-    <div id="fpStep2" style="display:none">
-      <div style="background:var(--bg3);border-radius:var(--r2);padding:14px;margin-bottom:16px;border-left:3px solid var(--accent)">
-        <p style="font-size:11px;color:var(--text2);margin-bottom:4px">Pertanyaan Keamanan</p>
-        <p id="fpQuestion" style="font-size:13px;font-weight:500"></p>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:14px">
-        <div>
-          <label style="font-size:12px;color:var(--text2);margin-bottom:6px;display:block">Jawaban Anda</label>
-          <input type="text" id="fpAnswer" placeholder="Jawaban pertanyaan keamanan" autocomplete="off">
-        </div>
-        <div>
-          <label style="font-size:12px;color:var(--text2);margin-bottom:6px;display:block">Kata Sandi Baru</label>
-          <div class="pass-wrap">
-            <input type="password" id="fpNewPass" placeholder="Kata sandi baru (min. 4 karakter)" autocomplete="new-password">
-            <button type="button" class="pass-eye" id="eyeFpPass" onclick="togglePass('fpNewPass','eyeFpPass')" aria-label="Tampilkan sandi">
-              <svg id="eyeFpPass-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-            </button>
-          </div>
-        </div>
-        <div style="display:flex;gap:10px">
-          <button class="btn-ghost" onclick="fpBackStep()" style="flex:1">← Kembali</button>
-          <button class="btn-primary" onclick="fpReset()" style="flex:2">Reset Sandi ✓</button>
-        </div>
+      <div style="display:flex;gap:10px">
+        <button class="btn-ghost" onclick="closeForgotPass()" style="flex:1">Batal</button>
+        <button class="btn-primary" onclick="fpReset()" style="flex:2">Kirim Link Reset ✉</button>
       </div>
     </div>
   </div>
@@ -655,6 +616,7 @@
 <!-- Firebase SDK (Compat v10) -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 
 <!-- Scripts -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
@@ -684,7 +646,8 @@ const firebaseConfig = {
 
 
 firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
+const db   = firebase.firestore();
+const auth = firebase.auth();
 
 // ====== PWA Install Logic ======
 let deferredInstallPrompt = null;
@@ -754,13 +717,13 @@ let catChartInst = null;
 let addTypeState = 'income';
 
 // ====== Firebase Helpers ======
-async function getUserDoc(username) {
-  const snap = await db.collection('users').doc(username).get();
+async function getUserDoc(uid) {
+  const snap = await db.collection('users').doc(uid).get();
   return snap.exists ? snap.data() : null;
 }
 
-async function saveUserDoc(username, data) {
-  await db.collection('users').doc(username).set(data);
+async function saveUserDoc(uid, data) {
+  await db.collection('users').doc(uid).set(data);
 }
 
 // ====== Storage (Firestore + Cache) ======
@@ -798,20 +761,36 @@ function togglePass(inputId, btnId) {
 
 // ====== Auth ======
 async function doLogin() {
-  const u = document.getElementById('loginUser').value.trim();
+  const u = document.getElementById('loginUser').value.trim().toLowerCase();
   const p = document.getElementById('loginPass').value;
   if (!u || !p) { toast('Isi semua field', true); return; }
   toast('Masuk...');
   try {
-    const userData = await getUserDoc(u);
-    if (!userData) { toast('Akun tidak ditemukan', true); return; }
-    if (userData.password !== btoa(p)) { toast('Kata sandi salah', true); return; }
-    currentUser = u;
-    currentUserData = userData;
-    showApp(userData.name || u);
+    // Cari UID dari username
+    const usernameDoc = await db.collection('usernames').doc(u).get();
+    if (!usernameDoc.exists) { toast('Akun tidak ditemukan', true); return; }
+    const uid = usernameDoc.data().uid;
+
+    // Ambil email dari profil user
+    const userDoc = await db.collection('users').doc(uid).get();
+    if (!userDoc.exists) { toast('Data akun tidak ditemukan', true); return; }
+    const email = userDoc.data().email;
+
+    // Login via Firebase Auth
+    await auth.signInWithEmailAndPassword(email, p);
+
+    currentUser     = uid;
+    currentUserData = userDoc.data();
+    showApp(currentUserData.name || u);
   } catch(e) {
     console.error(e);
-    toast('Gagal terhubung. Cek koneksi internet.', true);
+    if (e.code === 'auth/wrong-password' || e.code === 'auth/invalid-credential') {
+      toast('Kata sandi salah', true);
+    } else if (e.code === 'auth/too-many-requests') {
+      toast('Terlalu banyak percobaan. Coba lagi nanti.', true);
+    } else {
+      toast('Gagal masuk. Cek koneksi internet.', true);
+    }
   }
 }
 
@@ -819,108 +798,88 @@ function showRegister() { document.getElementById('registerModal').classList.add
 function closeRegister() { document.getElementById('registerModal').classList.remove('open'); }
 
 async function doRegister() {
-  const name = document.getElementById('regName').value.trim();
-  const u    = document.getElementById('regUser').value.trim();
-  const p    = document.getElementById('regPass').value;
-  const secQ = document.getElementById('regSecQ').value;
-  const secA = document.getElementById('regSecA').value.trim();
-  if (!name || !u || !p) { toast('Isi semua field pendaftaran', true); return; }
-  if (p.length < 4)      { toast('Kata sandi min. 4 karakter', true); return; }
-  if (!secA)             { toast('Isi jawaban pertanyaan keamanan', true); return; }
+  const name  = document.getElementById('regName').value.trim();
+  const u     = document.getElementById('regUser').value.trim().toLowerCase();
+  const email = document.getElementById('regEmail').value.trim();
+  const p     = document.getElementById('regPass').value;
+
+  if (!name || !u || !email || !p) { toast('Isi semua field pendaftaran', true); return; }
+  if (p.length < 6) { toast('Kata sandi min. 6 karakter', true); return; }
+  if (!email.includes('@')) { toast('Format email tidak valid', true); return; }
+
   try {
-    const existing = await getUserDoc(u);
-    if (existing) { toast('Nama pengguna sudah digunakan', true); return; }
-    await saveUserDoc(u, { name, password: btoa(p), transactions: [], secQ, secA: secA.toLowerCase().trim() });
+    // Cek username sudah dipakai atau belum
+    const existing = await db.collection('usernames').doc(u).get();
+    if (existing.exists) { toast('Nama pengguna sudah digunakan', true); return; }
+
+    // Buat akun di Firebase Auth
+    const cred = await auth.createUserWithEmailAndPassword(email, p);
+    const uid  = cred.user.uid;
+
+    // Simpan profil di Firestore (tanpa password!)
+    await db.collection('users').doc(uid).set({
+      name,
+      username: u,
+      email,
+      transactions: []
+    });
+
+    // Simpan mapping username → uid
+    await db.collection('usernames').doc(u).set({ uid });
+
     closeRegister();
     toast('Akun berhasil dibuat! Silakan masuk. ✓');
     document.getElementById('loginUser').value = u;
+    document.getElementById('regName').value  = '';
+    document.getElementById('regUser').value  = '';
+    document.getElementById('regEmail').value = '';
+    document.getElementById('regPass').value  = '';
   } catch(e) {
     console.error(e);
-    toast('Gagal mendaftar. Cek koneksi internet.', true);
+    if (e.code === 'auth/email-already-in-use') {
+      toast('Email sudah terdaftar di akun lain', true);
+    } else if (e.code === 'auth/invalid-email') {
+      toast('Format email tidak valid', true);
+    } else if (e.code === 'auth/weak-password') {
+      toast('Kata sandi terlalu lemah (min. 6 karakter)', true);
+    } else {
+      toast('Gagal mendaftar. Cek koneksi internet.', true);
+    }
   }
 }
 
 // ====== Forgot Password ======
 function showForgotPass() {
-  document.getElementById('fpUser').value = '';
-  document.getElementById('fpAnswer').value = '';
-  document.getElementById('fpNewPass').value = '';
-  document.getElementById('fpStep1').style.display = '';
-  document.getElementById('fpStep2').style.display = 'none';
+  document.getElementById('fpEmail').value = '';
   document.getElementById('forgotModal').classList.add('open');
 }
 function closeForgotPass() { document.getElementById('forgotModal').classList.remove('open'); }
 
-async function fpNextStep() {
-  const u = document.getElementById('fpUser').value.trim();
-  if (!u) { toast('Masukkan nama pengguna', true); return; }
-  try {
-    const userData = await getUserDoc(u);
-    if (!userData)      { toast('Akun tidak ditemukan', true); return; }
-    if (!userData.secQ) { toast('Akun ini tidak memiliki pertanyaan keamanan', true); return; }
-    document.getElementById('fpQuestion').textContent = users[u].secQ;
-    document.getElementById('fpStep1').style.display = 'none';
-    document.getElementById('fpStep2').style.display = '';
-    // simpan sementara untuk step 2
-    fpCurrentUser = u;
-    fpCurrentData = userData;
-  } catch(e) {
-    toast('Gagal terhubung. Cek koneksi internet.', true);
-  }
-}
-let fpCurrentUser = null;
-let fpCurrentData = null;
-
-// patch fpNextStep yang bener (fix reference bug di atas)
-async function fpNextStep() {
-  const u = document.getElementById('fpUser').value.trim();
-  if (!u) { toast('Masukkan nama pengguna', true); return; }
-  try {
-    const userData = await getUserDoc(u);
-    if (!userData)      { toast('Akun tidak ditemukan', true); return; }
-    if (!userData.secQ) { toast('Akun ini tidak memiliki pertanyaan keamanan', true); return; }
-    document.getElementById('fpQuestion').textContent = userData.secQ;
-    document.getElementById('fpStep1').style.display = 'none';
-    document.getElementById('fpStep2').style.display = '';
-    fpCurrentUser = u;
-    fpCurrentData = userData;
-  } catch(e) {
-    toast('Gagal terhubung. Cek koneksi internet.', true);
-  }
-}
-
-function fpBackStep() {
-  document.getElementById('fpStep1').style.display = '';
-  document.getElementById('fpStep2').style.display = 'none';
-}
-
 async function fpReset() {
-  const u      = fpCurrentUser;
-  const ans    = document.getElementById('fpAnswer').value.trim().toLowerCase();
-  const newPass = document.getElementById('fpNewPass').value;
-  if (!ans)                          { toast('Masukkan jawaban', true); return; }
-  if (!newPass || newPass.length < 4) { toast('Kata sandi baru min. 4 karakter', true); return; }
-  if (!fpCurrentData)                { toast('Ulangi dari langkah 1', true); return; }
-  if (fpCurrentData.secA !== ans)    { toast('Jawaban salah, coba lagi', true); return; }
+  const email = document.getElementById('fpEmail').value.trim();
+  if (!email) { toast('Masukkan email', true); return; }
   try {
-    fpCurrentData.password = btoa(newPass);
-    await saveUserDoc(u, fpCurrentData);
+    await auth.sendPasswordResetEmail(email);
     closeForgotPass();
-    toast('Kata sandi berhasil direset! Silakan masuk. ✓');
-    document.getElementById('loginUser').value = u;
-    document.getElementById('loginPass').value = '';
+    toast('Link reset sandi telah dikirim ke email kamu ✉');
   } catch(e) {
-    toast('Gagal menyimpan. Cek koneksi.', true);
+    if (e.code === 'auth/user-not-found') {
+      toast('Email tidak terdaftar', true);
+    } else {
+      toast('Gagal mengirim email. Cek koneksi internet.', true);
+    }
   }
 }
 
 function doLogout() {
-  currentUser = null;
-  currentUserData = null;   // ← bersihkan cache
+  auth.signOut();
+  currentUser     = null;
+  currentUserData = null;
   document.getElementById('loginScreen').style.display = 'flex';
   document.getElementById('loginScreen').classList.add('active');
   document.getElementById('appScreen').style.display = 'none';
   document.getElementById('appScreen').classList.remove('active');
+  document.getElementById('loginUser').value = '';
   document.getElementById('loginPass').value = '';
 }
 
