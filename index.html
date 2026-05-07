@@ -765,13 +765,19 @@ async function doLogin() {
     currentUserData = userDoc.data();
     showApp(currentUserData.name || u);
   } catch(e) {
-    console.error(e);
-    if (e.code === 'auth/wrong-password' || e.code === 'auth/invalid-credential') {
+    console.error('[FINANKU] Login error:', e.code, e.message);
+    if (e.code === 'auth/wrong-password' || e.code === 'auth/invalid-credential' || e.code === 'auth/invalid-login-credentials') {
       toast('Kata sandi salah', true);
     } else if (e.code === 'auth/too-many-requests') {
       toast('Terlalu banyak percobaan. Coba lagi nanti.', true);
-    } else {
+    } else if (e.code === 'auth/user-disabled') {
+      toast('Akun ini telah dinonaktifkan', true);
+    } else if (e.code === 'permission-denied') {
+      toast('Akses ditolak. Periksa Firestore Rules di Firebase Console.', true);
+    } else if (e.code === 'auth/network-request-failed') {
       toast('Gagal masuk. Cek koneksi internet.', true);
+    } else {
+      toast('Gagal masuk (' + (e.code || 'unknown') + '). Coba lagi.', true);
     }
   }
 }
