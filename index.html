@@ -333,7 +333,6 @@
     </div>
     <div style="display:flex;gap:4px">
       <button class="nav-btn btn-ghost" data-tab="dashboard" onclick="switchTab('dashboard')" style="font-size:13px;padding:6px 14px">Dashboard</button>
-      <button class="nav-btn btn-ghost" data-tab="transactions" onclick="switchTab('transactions')" style="font-size:13px;padding:6px 14px">Transaksi</button>
       <button class="nav-btn btn-ghost" data-tab="riwayat" onclick="switchTab('riwayat')" style="font-size:13px;padding:6px 14px">Riwayat</button>
       <button class="nav-btn btn-ghost" data-tab="stats" onclick="switchTab('stats')" style="font-size:13px;padding:6px 14px">Statistik</button>
     </div>
@@ -358,14 +357,6 @@
           <circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/>
         </svg>
         Tambah
-      </button>
-      <button class="bnav-btn" data-tab="transactions" onclick="switchTab('transactions')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/>
-          <line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/>
-          <line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
-        </svg>
-        Transaksi
       </button>
       <button class="bnav-btn" data-tab="riwayat" onclick="switchTab('riwayat')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -392,14 +383,6 @@
         <div>
           <h2 style="font-size:20px;font-weight:700">Dashboard</h2>
           <p id="greetUser" style="color:var(--text2);font-size:13px;margin-top:2px"></p>
-        </div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <button class="btn-success" onclick="exportXLSX()" style="display:flex;align-items:center;gap:6px;font-size:13px">
-            <span>⬇</span> Ekspor .xlsx
-          </button>
-          <button class="btn-export-pdf" onclick="exportPDF()" style="display:flex;align-items:center;gap:6px;font-size:13px">
-            <span>📄</span> Ekspor PDF
-          </button>
         </div>
       </div>
 
@@ -540,8 +523,6 @@
           <select id="filterCat" onchange="renderTransactions()" style="width:auto;font-size:13px;padding:6px 10px">
             <option value="all">Semua Kategori</option>
           </select>
-          <button class="btn-success" onclick="exportXLSX()" style="font-size:13px;padding:7px 14px">⬇ Ekspor .xlsx</button>
-          <button class="btn-export-pdf" onclick="exportPDF()" style="font-size:13px;padding:7px 14px">📄 Ekspor PDF</button>
         </div>
       </div>
       <div class="card" style="overflow:hidden">
@@ -565,6 +546,8 @@
           <select id="riwayatCat" onchange="renderHistory()" style="width:auto;font-size:13px;padding:6px 10px">
             <option value="all">Semua Kategori</option>
           </select>
+          <button class="btn-success" onclick="exportXLSX()" style="font-size:13px;padding:7px 14px">⬇ Ekspor .xlsx</button>
+          <button class="btn-export-pdf" onclick="exportPDF()" style="font-size:13px;padding:7px 14px">📄 Ekspor PDF</button>
         </div>
       </div>
       <!-- Summary strip -->
@@ -643,7 +626,6 @@ const firebaseConfig = {
   appId: "1:96887762994:web:4436cec94942b1b8bc4c2b",
   measurementId: "G-EK8M6CXSNP"
 };
-
 
 firebase.initializeApp(firebaseConfig);
 const db   = firebase.firestore();
