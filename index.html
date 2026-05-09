@@ -227,10 +227,6 @@
         <input type="text" id="regUser" placeholder="Buat nama pengguna" autocomplete="username">
       </div>
       <div>
-        <label style="font-size:12px;color:var(--text2);margin-bottom:6px;display:block">Email <span style="color:var(--text3)">(untuk reset sandi)</span></label>
-        <input type="email" id="regEmail" placeholder="contoh@gmail.com" autocomplete="email">
-      </div>
-      <div>
         <label style="font-size:12px;color:var(--text2);margin-bottom:6px;display:block">Kata Sandi</label>
         <div class="pass-wrap">
           <input type="password" id="regPass" placeholder="Buat kata sandi (min. 4 karakter)" autocomplete="new-password">
@@ -238,6 +234,20 @@
             <svg id="eyeRegPass-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
           </button>
         </div>
+      </div>
+      <div>
+        <label style="font-size:12px;color:var(--text2);margin-bottom:6px;display:block">Pertanyaan Keamanan <span style="color:var(--text3)">(untuk lupa sandi)</span></label>
+        <select id="regSecQ">
+          <option value="Nama hewan peliharaan pertama Anda?">Nama hewan peliharaan pertama Anda?</option>
+          <option value="Nama kota kelahiran Anda?">Nama kota kelahiran Anda?</option>
+          <option value="Nama SD tempat Anda belajar?">Nama SD tempat Anda belajar?</option>
+          <option value="Makanan favorit masa kecil Anda?">Makanan favorit masa kecil Anda?</option>
+          <option value="Nama panggilan Anda saat kecil?">Nama panggilan Anda saat kecil?</option>
+        </select>
+      </div>
+      <div>
+        <label style="font-size:12px;color:var(--text2);margin-bottom:6px;display:block">Jawaban Pertanyaan Keamanan</label>
+        <input type="text" id="regSecA" placeholder="Jawaban (tidak case-sensitive)" autocomplete="off">
       </div>
       <div style="display:flex;gap:10px;margin-top:4px">
         <button class="btn-ghost" onclick="closeRegister()" style="flex:1">Batal</button>
@@ -254,15 +264,44 @@
       <h2 style="font-size:18px;font-weight:600">Lupa Sandi</h2>
       <button onclick="closeForgotPass()" style="background:transparent;border:none;color:var(--text3);font-size:20px;cursor:pointer;padding:4px;line-height:1">✕</button>
     </div>
-    <p style="font-size:13px;color:var(--text2);margin-bottom:16px">Masukkan email yang terdaftar. Kami akan mengirim link reset sandi ke email tersebut.</p>
-    <div style="display:flex;flex-direction:column;gap:14px">
-      <div>
-        <label style="font-size:12px;color:var(--text2);margin-bottom:6px;display:block">Email</label>
-        <input type="email" id="fpEmail" placeholder="contoh@gmail.com" autocomplete="email">
+    <!-- Step 1: Enter username -->
+    <div id="fpStep1">
+      <p style="font-size:13px;color:var(--text2);margin-bottom:16px">Masukkan nama pengguna Anda untuk melanjutkan pemulihan akun.</p>
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div>
+          <label style="font-size:12px;color:var(--text2);margin-bottom:6px;display:block">Nama Pengguna</label>
+          <input type="text" id="fpUser" placeholder="Masukkan nama pengguna" autocomplete="username">
+        </div>
+        <div style="display:flex;gap:10px">
+          <button class="btn-ghost" onclick="closeForgotPass()" style="flex:1">Batal</button>
+          <button class="btn-primary" onclick="fpNextStep()" style="flex:2">Lanjutkan →</button>
+        </div>
       </div>
-      <div style="display:flex;gap:10px">
-        <button class="btn-ghost" onclick="closeForgotPass()" style="flex:1">Batal</button>
-        <button class="btn-primary" onclick="fpReset()" style="flex:2">Kirim Link Reset ✉</button>
+    </div>
+    <!-- Step 2: Security question + new password -->
+    <div id="fpStep2" style="display:none">
+      <div style="background:var(--bg3);border-radius:var(--r2);padding:14px;margin-bottom:16px;border-left:3px solid var(--accent)">
+        <p style="font-size:11px;color:var(--text2);margin-bottom:4px">Pertanyaan Keamanan</p>
+        <p id="fpQuestion" style="font-size:13px;font-weight:500"></p>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div>
+          <label style="font-size:12px;color:var(--text2);margin-bottom:6px;display:block">Jawaban Anda</label>
+          <input type="text" id="fpAnswer" placeholder="Jawaban pertanyaan keamanan" autocomplete="off">
+        </div>
+        <div>
+          <label style="font-size:12px;color:var(--text2);margin-bottom:6px;display:block">Kata Sandi Baru</label>
+          <div class="pass-wrap">
+            <input type="password" id="fpNewPass" placeholder="Kata sandi baru (min. 4 karakter)" autocomplete="new-password">
+            <button type="button" class="pass-eye" id="eyeFpPass" onclick="togglePass('fpNewPass','eyeFpPass')" aria-label="Tampilkan sandi">
+              <svg id="eyeFpPass-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px">
+          <button class="btn-ghost" onclick="fpBackStep()" style="flex:1">← Kembali</button>
+          <button class="btn-primary" onclick="fpReset()" style="flex:2">Reset Sandi ✓</button>
+        </div>
       </div>
     </div>
   </div>
@@ -543,9 +582,7 @@
             <button class="btn-export-pdf" onclick="exportPDF()" style="font-size:13px;padding:7px 14px">📄 Ekspor PDF</button>
           </div>
         </div>
-        <!-- Search bar -->
         <input type="text" id="riwayatSearch" placeholder="🔍 Cari transaksi berdasarkan keterangan atau kategori..." oninput="renderHistory()" style="margin-bottom:10px;font-size:13px">
-        <!-- Filter & Sort row -->
         <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
           <select id="riwayatType" onchange="renderHistory()" style="width:auto;font-size:13px;padding:6px 10px">
             <option value="all">Semua Jenis</option>
@@ -567,11 +604,8 @@
           <button onclick="clearRiwayatDates()" style="background:var(--bg3);color:var(--text2);border:1px solid var(--border2);border-radius:var(--r2);padding:6px 12px;font-size:12px">✕ Reset Tanggal</button>
         </div>
       </div>
-      <!-- Summary strip -->
       <div id="riwayatSummary" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:20px"></div>
-      <!-- Grouped list -->
       <div id="riwayatList"></div>
-      <!-- Pagination -->
       <div id="riwayatPagination"></div>
     </div>
 
@@ -583,14 +617,12 @@
             <h2 style="font-size:20px;font-weight:700">Statistik Keuangan</h2>
             <p style="color:var(--text2);font-size:13px;margin-top:2px">Analisis pemasukan & pengeluaran Anda</p>
           </div>
-          <!-- Type Toggle -->
           <div style="display:flex;gap:6px">
             <button class="stats-type-btn" data-type="all" onclick="setStatsType('all')" style="padding:6px 14px;font-size:12px;font-weight:600;border-radius:var(--r2);border:1px solid var(--accent);background:rgba(108,99,255,0.2);color:var(--accent)">Semua</button>
             <button class="stats-type-btn" data-type="income" onclick="setStatsType('income')" style="padding:6px 14px;font-size:12px;font-weight:600;border-radius:var(--r2);border:1px solid var(--border2);background:var(--bg3);color:var(--text2)">📈 Pemasukan</button>
             <button class="stats-type-btn" data-type="expense" onclick="setStatsType('expense')" style="padding:6px 14px;font-size:12px;font-weight:600;border-radius:var(--r2);border:1px solid var(--border2);background:var(--bg3);color:var(--text2)">📉 Pengeluaran</button>
           </div>
         </div>
-        <!-- Period filter -->
         <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">
           <button class="stats-period-btn" data-period="all" onclick="setStatsPeriod('all')" style="padding:5px 12px;font-size:12px;font-weight:600;border-radius:var(--r2);border:1px solid var(--accent);background:var(--accent);color:#fff">Semua</button>
           <button class="stats-period-btn" data-period="daily" onclick="setStatsPeriod('daily')" style="padding:5px 12px;font-size:12px;font-weight:600;border-radius:var(--r2);border:1px solid var(--border2);background:var(--bg3);color:var(--text2)">Hari Ini</button>
@@ -599,7 +631,6 @@
           <button class="stats-period-btn" data-period="yearly" onclick="setStatsPeriod('yearly')" style="padding:5px 12px;font-size:12px;font-weight:600;border-radius:var(--r2);border:1px solid var(--border2);background:var(--bg3);color:var(--text2)">Tahun Ini</button>
           <button class="stats-period-btn" data-period="custom" onclick="setStatsPeriod('custom')" style="padding:5px 12px;font-size:12px;font-weight:600;border-radius:var(--r2);border:1px solid var(--border2);background:var(--bg3);color:var(--text2)">Custom</button>
         </div>
-        <!-- Custom date range (hidden by default) -->
         <div id="statsCustomRange" style="display:none;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px">
           <span style="font-size:12px;color:var(--text3)">Dari:</span>
           <input type="date" id="statsDateFrom" onchange="statsFilter.dateFrom=this.value;renderCharts()" style="width:auto;font-size:13px;padding:6px 10px">
@@ -643,11 +674,6 @@
   <button class="install-dismiss" onclick="dismissInstall()">✕</button>
 </div>
 
-<!-- Firebase SDK (Compat v10) -->
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-
 <!-- Scripts -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -655,35 +681,13 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
 <script>
-// ====================================================
-// ██████╗ ██╗ ██████╗ ███████╗██████╗  █████╗ ███████╗███████╗
-// FINANKU — Firebase Cross-Device Sync Edition
-// ====================================================
-
-// ============================================================
-// ⚡ LANGKAH 1: ISI FIREBASE CONFIG LO DI SINI
-// Ambil dari Firebase Console → Project Settings → Your Apps
-// ============================================================
-const firebaseConfig = {
-  apiKey: "AIzaSyAWd297zren0MOWcxLzX_Fbcl--mid01-M",
-  authDomain: "finanku-a919d.firebaseapp.com",
-  projectId: "finanku-a919d",
-  storageBucket: "finanku-a919d.firebasestorage.app",
-  messagingSenderId: "96887762994",
-  appId: "1:96887762994:web:4436cec94942b1b8bc4c2b",
-  measurementId: "G-EK8M6CXSNP"
-};
-
-firebase.initializeApp(firebaseConfig);
-const db   = firebase.firestore();
-const auth = firebase.auth();
-
 // ====== PWA Install Logic ======
 let deferredInstallPrompt = null;
 
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   deferredInstallPrompt = e;
+  // Tunda banner 3 detik biar tidak langsung muncul
   if (!localStorage.getItem('finanku_install_dismissed')) {
     setTimeout(() => {
       document.getElementById('installBanner').classList.add('show');
@@ -723,6 +727,7 @@ function isInStandaloneMode() {
     window.matchMedia('(display-mode: standalone)').matches;
 }
 
+// Tampilkan hint iOS jika belum di-install
 window.addEventListener('load', () => {
   if (isIOS() && !isInStandaloneMode()) {
     document.getElementById('iosHint').style.display = 'block';
@@ -740,34 +745,25 @@ if ('serviceWorker' in navigator) {
 
 // ====== App State ======
 let currentUser = null;
-let currentUserData = null;   // ← cache in-memory, supaya read tetap cepat
 let trendChartInst = null;
 let catChartInst = null;
-let addTypeState = 'income';
+let addTypeState = 'income'; // for mobile add tab
 let statsFilter = { period: 'all', typeFilter: 'all', dateFrom: '', dateTo: '' };
 let riwayatPage = 1;
 const RIWAYAT_PAGE_SIZE = 20;
 
-// ====== Firebase Helpers ======
-async function getUserDoc(uid) {
-  const snap = await db.collection('users').doc(uid).get();
-  return snap.exists ? snap.data() : null;
+// ====== Storage ======
+function getUsers(){return JSON.parse(localStorage.getItem('finanku_users')||'{}')}
+function saveUsers(u){localStorage.setItem('finanku_users',JSON.stringify(u))}
+function getTx(){
+  const users=getUsers();
+  return (users[currentUser]&&users[currentUser].transactions)||[];
 }
-
-async function saveUserDoc(uid, data) {
-  await db.collection('users').doc(uid).set(data);
-}
-
-// ====== Storage (Firestore + Cache) ======
-// getTx() tetap SINKRON — baca dari cache di memori (cepat!)
-function getTx() {
-  return (currentUserData && currentUserData.transactions) || [];
-}
-
-// saveTx() ASYNC — tulis ke cache + Firestore (cross-device!)
-async function saveTx(txs) {
-  currentUserData.transactions = txs;
-  await saveUserDoc(currentUser, currentUserData);
+function saveTx(txs){
+  const users=getUsers();
+  if(!users[currentUser])users[currentUser]={};
+  users[currentUser].transactions=txs;
+  saveUsers(users);
 }
 
 // ====== Toast ======
@@ -792,132 +788,85 @@ function togglePass(inputId, btnId) {
 }
 
 // ====== Auth ======
-async function doLogin() {
-  const u = document.getElementById('loginUser').value.trim().toLowerCase();
+function doLogin() {
+  const u = document.getElementById('loginUser').value.trim();
   const p = document.getElementById('loginPass').value;
   if (!u || !p) { toast('Isi semua field', true); return; }
-  toast('Masuk...');
-  try {
-    // Cari UID dari username
-    const usernameDoc = await db.collection('usernames').doc(u).get();
-    if (!usernameDoc.exists) { toast('Akun tidak ditemukan', true); return; }
-    const uid = usernameDoc.data().uid;
-
-    // Ambil email dari profil user
-    const userDoc = await db.collection('users').doc(uid).get();
-    if (!userDoc.exists) { toast('Data akun tidak ditemukan', true); return; }
-    const email = userDoc.data().email;
-
-    // Login via Firebase Auth
-    await auth.signInWithEmailAndPassword(email, p);
-
-    currentUser     = uid;
-    currentUserData = userDoc.data();
-    showApp(currentUserData.name || u);
-  } catch(e) {
-    console.error('[FINANKU] Login error:', e.code, e.message);
-    if (e.code === 'auth/wrong-password' || e.code === 'auth/invalid-credential' || e.code === 'auth/invalid-login-credentials') {
-      toast('Kata sandi salah', true);
-    } else if (e.code === 'auth/too-many-requests') {
-      toast('Terlalu banyak percobaan. Coba lagi nanti.', true);
-    } else if (e.code === 'auth/user-disabled') {
-      toast('Akun ini telah dinonaktifkan', true);
-    } else if (e.code === 'permission-denied') {
-      toast('Akses ditolak. Periksa Firestore Rules di Firebase Console.', true);
-    } else if (e.code === 'auth/network-request-failed') {
-      toast('Gagal masuk. Cek koneksi internet.', true);
-    } else {
-      toast('Gagal masuk (' + (e.code || 'unknown') + '). Coba lagi.', true);
-    }
-  }
+  const users = getUsers();
+  if (!users[u]) { toast('Akun tidak ditemukan', true); return; }
+  if (users[u].password !== btoa(p)) { toast('Kata sandi salah', true); return; }
+  currentUser = u;
+  showApp(users[u].name || u);
 }
 
 function showRegister() { document.getElementById('registerModal').classList.add('open'); }
 function closeRegister() { document.getElementById('registerModal').classList.remove('open'); }
 
-async function doRegister() {
-  const name  = document.getElementById('regName').value.trim();
-  const u     = document.getElementById('regUser').value.trim().toLowerCase();
-  const email = document.getElementById('regEmail').value.trim();
-  const p     = document.getElementById('regPass').value;
-
-  if (!name || !u || !email || !p) { toast('Isi semua field pendaftaran', true); return; }
-  if (p.length < 6) { toast('Kata sandi min. 6 karakter', true); return; }
-  if (!email.includes('@')) { toast('Format email tidak valid', true); return; }
-
-  try {
-    // Cek username sudah dipakai atau belum
-    const existing = await db.collection('usernames').doc(u).get();
-    if (existing.exists) { toast('Nama pengguna sudah digunakan', true); return; }
-
-    // Buat akun di Firebase Auth
-    const cred = await auth.createUserWithEmailAndPassword(email, p);
-    const uid  = cred.user.uid;
-
-    // Simpan profil di Firestore (tanpa password!)
-    await db.collection('users').doc(uid).set({
-      name,
-      username: u,
-      email,
-      transactions: []
-    });
-
-    // Simpan mapping username → uid
-    await db.collection('usernames').doc(u).set({ uid });
-
-    closeRegister();
-    toast('Akun berhasil dibuat! Silakan masuk. ✓');
-    document.getElementById('loginUser').value = u;
-    document.getElementById('regName').value  = '';
-    document.getElementById('regUser').value  = '';
-    document.getElementById('regEmail').value = '';
-    document.getElementById('regPass').value  = '';
-  } catch(e) {
-    console.error(e);
-    if (e.code === 'auth/email-already-in-use') {
-      toast('Email sudah terdaftar di akun lain', true);
-    } else if (e.code === 'auth/invalid-email') {
-      toast('Format email tidak valid', true);
-    } else if (e.code === 'auth/weak-password') {
-      toast('Kata sandi terlalu lemah (min. 6 karakter)', true);
-    } else {
-      toast('Gagal mendaftar. Cek koneksi internet.', true);
-    }
-  }
+function doRegister() {
+  const name = document.getElementById('regName').value.trim();
+  const u = document.getElementById('regUser').value.trim();
+  const p = document.getElementById('regPass').value;
+  const secQ = document.getElementById('regSecQ').value;
+  const secA = document.getElementById('regSecA').value.trim();
+  if (!name || !u || !p) { toast('Isi semua field pendaftaran', true); return; }
+  if (p.length < 4) { toast('Kata sandi min. 4 karakter', true); return; }
+  if (!secA) { toast('Isi jawaban pertanyaan keamanan', true); return; }
+  const users = getUsers();
+  if (users[u]) { toast('Nama pengguna sudah digunakan', true); return; }
+  users[u] = { name, password: btoa(p), transactions: [], secQ, secA: secA.toLowerCase().trim() };
+  saveUsers(users);
+  closeRegister();
+  toast('Akun berhasil dibuat! Silakan masuk.');
+  document.getElementById('loginUser').value = u;
 }
 
 // ====== Forgot Password ======
 function showForgotPass() {
-  document.getElementById('fpEmail').value = '';
+  document.getElementById('fpUser').value = '';
+  document.getElementById('fpAnswer').value = '';
+  document.getElementById('fpNewPass').value = '';
+  document.getElementById('fpStep1').style.display = '';
+  document.getElementById('fpStep2').style.display = 'none';
   document.getElementById('forgotModal').classList.add('open');
 }
 function closeForgotPass() { document.getElementById('forgotModal').classList.remove('open'); }
-
-async function fpReset() {
-  const email = document.getElementById('fpEmail').value.trim();
-  if (!email) { toast('Masukkan email', true); return; }
-  try {
-    await auth.sendPasswordResetEmail(email);
-    closeForgotPass();
-    toast('Link reset sandi telah dikirim ke email kamu ✉');
-  } catch(e) {
-    if (e.code === 'auth/user-not-found') {
-      toast('Email tidak terdaftar', true);
-    } else {
-      toast('Gagal mengirim email. Cek koneksi internet.', true);
-    }
-  }
+function fpNextStep() {
+  const u = document.getElementById('fpUser').value.trim();
+  if (!u) { toast('Masukkan nama pengguna', true); return; }
+  const users = getUsers();
+  if (!users[u]) { toast('Akun tidak ditemukan', true); return; }
+  if (!users[u].secQ) { toast('Akun ini tidak memiliki pertanyaan keamanan', true); return; }
+  document.getElementById('fpQuestion').textContent = users[u].secQ;
+  document.getElementById('fpStep1').style.display = 'none';
+  document.getElementById('fpStep2').style.display = '';
+}
+function fpBackStep() {
+  document.getElementById('fpStep1').style.display = '';
+  document.getElementById('fpStep2').style.display = 'none';
+}
+function fpReset() {
+  const u = document.getElementById('fpUser').value.trim();
+  const ans = document.getElementById('fpAnswer').value.trim().toLowerCase();
+  const newPass = document.getElementById('fpNewPass').value;
+  if (!ans) { toast('Masukkan jawaban', true); return; }
+  if (!newPass || newPass.length < 4) { toast('Kata sandi baru min. 4 karakter', true); return; }
+  const users = getUsers();
+  if (!users[u]) { toast('Akun tidak ditemukan', true); return; }
+  if (users[u].secA !== ans) { toast('Jawaban salah, coba lagi', true); return; }
+  users[u].password = btoa(newPass);
+  saveUsers(users);
+  closeForgotPass();
+  toast('Kata sandi berhasil direset! Silakan masuk. ✓');
+  document.getElementById('loginUser').value = u;
+  document.getElementById('loginPass').value = '';
 }
 
 function doLogout() {
-  auth.signOut();
-  currentUser     = null;
-  currentUserData = null;
+  currentUser = null;
   document.getElementById('loginScreen').style.display = 'flex';
   document.getElementById('loginScreen').classList.add('active');
   document.getElementById('appScreen').style.display = 'none';
   document.getElementById('appScreen').classList.remove('active');
-  document.getElementById('loginUser').value = '';
   document.getElementById('loginPass').value = '';
 }
 
@@ -941,13 +890,18 @@ function showApp(name) {
 function switchTab(tab) {
   document.querySelectorAll('.tab-content').forEach(t => { t.style.display = 'none'; });
   document.getElementById('tab-' + tab).style.display = 'block';
+
+  // Desktop nav
   document.querySelectorAll('.nav-btn').forEach(b => {
     b.style.background = b.dataset.tab === tab ? 'var(--bg3)' : '';
     b.style.color = b.dataset.tab === tab ? 'var(--text)' : '';
   });
+
+  // Mobile bottom nav
   document.querySelectorAll('.bnav-btn').forEach(b => {
     b.classList.toggle('active', b.dataset.tab === tab);
   });
+
   if (tab === 'stats') renderCharts();
   if (tab === 'transactions') renderTransactions();
   if (tab === 'riwayat') renderHistory();
@@ -975,19 +929,19 @@ function setAddType(type) {
   }
 }
 
-async function addTransactionMobile() {
-  const type   = addTypeState;
-  const desc   = document.getElementById('aDesc').value.trim();
+function addTransactionMobile() {
+  const type = addTypeState;
+  const desc = document.getElementById('aDesc').value.trim();
   const amount = parseFloat(document.getElementById('aAmount').value);
-  const cat    = getCatValue('a');
-  const date   = document.getElementById('aDate').value;
-  if (!desc)             { toast('Isi keterangan transaksi', true); return; }
+  const cat = getCatValue('a');
+  const date = document.getElementById('aDate').value;
+  if (!desc) { toast('Isi keterangan transaksi', true); return; }
   if (!amount || amount <= 0) { toast('Jumlah harus lebih dari 0', true); return; }
-  if (!date)             { toast('Pilih tanggal', true); return; }
+  if (!date) { toast('Pilih tanggal', true); return; }
   if (cat === 'Lainnya') { toast('Tulis nama kategori dulu', true); return; }
   const txs = getTx();
   txs.unshift({ id: Date.now(), type, desc, amount, cat, date });
-  await saveTx(txs);
+  saveTx(txs);
   document.getElementById('aDesc').value = '';
   document.getElementById('aAmount').value = '';
   document.getElementById('aCatCustom').value = '';
@@ -999,19 +953,19 @@ async function addTransactionMobile() {
 }
 
 // ====== Transactions ======
-async function addTransaction() {
-  const type   = document.getElementById('qType').value;
-  const desc   = document.getElementById('qDesc').value.trim();
+function addTransaction() {
+  const type = document.getElementById('qType').value;
+  const desc = document.getElementById('qDesc').value.trim();
   const amount = parseFloat(document.getElementById('qAmount').value);
-  const cat    = getCatValue('q');
-  const date   = document.getElementById('qDate').value;
-  if (!desc)             { toast('Isi keterangan transaksi', true); return; }
+  const cat = getCatValue('q');
+  const date = document.getElementById('qDate').value;
+  if (!desc) { toast('Isi keterangan transaksi', true); return; }
   if (!amount || amount <= 0) { toast('Jumlah harus lebih dari 0', true); return; }
-  if (!date)             { toast('Pilih tanggal', true); return; }
+  if (!date) { toast('Pilih tanggal', true); return; }
   if (cat === 'Lainnya') { toast('Tulis nama kategori dulu', true); return; }
   const txs = getTx();
   txs.unshift({ id: Date.now(), type, desc, amount, cat, date });
-  await saveTx(txs);
+  saveTx(txs);
   document.getElementById('qDesc').value = '';
   document.getElementById('qAmount').value = '';
   document.getElementById('qCatCustom').value = '';
@@ -1021,25 +975,25 @@ async function addTransaction() {
   refreshAll();
 }
 
-async function deleteTransaction(id) {
+function deleteTransaction(id) {
   if (!confirm('Hapus transaksi ini?')) return;
   const txs = getTx().filter(t => t.id !== id);
-  await saveTx(txs);
+  saveTx(txs);
   toast('Transaksi dihapus');
   refreshAll();
   renderTransactions();
 }
 
 function refreshAll() {
-  const txs    = getTx();
-  const income  = txs.filter(t => t.type === 'income').reduce((a, t) => a + t.amount, 0);
+  const txs = getTx();
+  const income = txs.filter(t => t.type === 'income').reduce((a, t) => a + t.amount, 0);
   const expense = txs.filter(t => t.type === 'expense').reduce((a, t) => a + t.amount, 0);
-  const net     = income - expense;
-  document.getElementById('totalIncome').textContent  = 'Rp ' + fmt(income);
+  const net = income - expense;
+  document.getElementById('totalIncome').textContent = 'Rp ' + fmt(income);
   document.getElementById('totalExpense').textContent = 'Rp ' + fmt(expense);
   const nb = document.getElementById('netBalance');
-  nb.textContent  = 'Rp ' + fmt(Math.abs(net));
-  nb.style.color  = net >= 0 ? 'var(--accent)' : 'var(--danger)';
+  nb.textContent = 'Rp ' + fmt(Math.abs(net));
+  nb.style.color = net >= 0 ? 'var(--accent)' : 'var(--danger)';
   document.getElementById('totalTrx').textContent = txs.length;
   renderRecent(txs.slice(0, 8));
 }
@@ -1078,14 +1032,14 @@ function renderRecent(txs) {
 
 function renderTransactions() {
   const fType = document.getElementById('filterType').value;
-  const fCat  = document.getElementById('filterCat').value;
-  let txs     = getTx();
-  const cats  = [...new Set(txs.map(t => t.cat))];
+  const fCat = document.getElementById('filterCat').value;
+  let txs = getTx();
+  const cats = [...new Set(txs.map(t => t.cat))];
   const catSel = document.getElementById('filterCat');
   const curCat = catSel.value;
   catSel.innerHTML = '<option value="all">Semua Kategori</option>' + cats.map(c => `<option value="${c}"${c === curCat ? ' selected' : ''}>${c}</option>`).join('');
   if (fType !== 'all') txs = txs.filter(t => t.type === fType);
-  if (fCat  !== 'all') txs = txs.filter(t => t.cat === fCat);
+  if (fCat !== 'all') txs = txs.filter(t => t.cat === fCat);
   const el = document.getElementById('transactionTable');
   if (!txs.length) { el.innerHTML = '<p style="text-align:center;color:var(--text2);padding:40px;font-size:13px">Tidak ada transaksi</p>'; return; }
   el.innerHTML = `<table style="width:100%;border-collapse:collapse">
@@ -1108,7 +1062,6 @@ function renderCharts() {
   const typeF  = statsFilter.typeFilter;
   const now    = new Date();
 
-  // Period filter
   if (period === 'daily') {
     const today = now.toISOString().split('T')[0];
     txs = txs.filter(t => t.date === today);
@@ -1129,9 +1082,7 @@ function renderCharts() {
     if (statsFilter.dateTo)   txs = txs.filter(t => t.date <= statsFilter.dateTo);
   }
 
-  // Type filter for summary cards (tren chart always show both for comparison)
   const txsForCat = typeF !== 'all' ? txs.filter(t => t.type === typeF) : txs;
-
   renderTrendChart(txs);
   renderCatChart(txsForCat);
   renderCatSummary(txs);
@@ -1160,7 +1111,6 @@ function setStatsType(t) {
     b.style.color       = active ? colors[t] : 'var(--text2)';
     b.style.borderColor = active ? colors[t] : 'var(--border2)';
   });
-  // Update donut chart title
   const titleEl = document.getElementById('catChartTitle');
   if (titleEl) titleEl.textContent = t === 'income' ? 'Distribusi Pemasukan' : 'Distribusi Pengeluaran';
   renderCharts();
@@ -1173,17 +1123,17 @@ function renderTrendChart(txs) {
     if (!months[m]) months[m] = { income: 0, expense: 0 };
     months[m][t.type] += t.amount;
   });
-  const labels   = Object.keys(months).sort().slice(-6);
-  const incomes  = labels.map(m => months[m].income || 0);
+  const labels = Object.keys(months).sort().slice(-6);
+  const incomes = labels.map(m => months[m].income || 0);
   const expenses = labels.map(m => months[m].expense || 0);
-  const lblFmt   = labels.map(m => { const [y, mo] = m.split('-'); return new Date(y, mo - 1).toLocaleDateString('id-ID', { month: 'short', year: '2-digit' }); });
+  const lblFmt = labels.map(m => { const [y, mo] = m.split('-'); return new Date(y, mo - 1).toLocaleDateString('id-ID', { month: 'short', year: '2-digit' }); });
   const ctx = document.getElementById('trendChart').getContext('2d');
   if (trendChartInst) trendChartInst.destroy();
   trendChartInst = new Chart(ctx, {
     type: 'bar',
     data: {
       labels: lblFmt, datasets: [
-        { label: 'Pemasukan',   data: incomes,  backgroundColor: 'rgba(52,211,153,0.7)', borderRadius: 4 },
+        { label: 'Pemasukan', data: incomes, backgroundColor: 'rgba(52,211,153,0.7)', borderRadius: 4 },
         { label: 'Pengeluaran', data: expenses, backgroundColor: 'rgba(248,113,113,0.7)', borderRadius: 4 }
       ]
     },
@@ -1192,7 +1142,7 @@ function renderTrendChart(txs) {
       plugins: { legend: { display: true, labels: { color: '#9ca3c4', font: { size: 11 }, boxWidth: 10 } } },
       scales: {
         x: { ticks: { color: '#9ca3c4', font: { size: 11 } }, grid: { color: 'rgba(255,255,255,0.04)' } },
-        y: { ticks: { color: '#9ca3c4', font: { size: 11 }, callback: v => v >= 1e6 ? (v/1e6).toFixed(1)+'jt' : v >= 1e3 ? (v/1e3).toFixed(0)+'rb' : v }, grid: { color: 'rgba(255,255,255,0.04)' } }
+        y: { ticks: { color: '#9ca3c4', font: { size: 11 }, callback: v => v >= 1e6 ? (v / 1e6).toFixed(1) + 'jt' : v >= 1e3 ? (v / 1e3).toFixed(0) + 'rb' : v }, grid: { color: 'rgba(255,255,255,0.04)' } }
       }
     }
   });
@@ -1212,7 +1162,6 @@ function renderCatChart(txs) {
     if (legendEl) legendEl.innerHTML = '<p style="color:var(--text3);text-align:center;font-size:13px;padding:16px">Tidak ada data untuk ditampilkan</p>';
     return;
   }
-  // Sort by descending amount
   const sorted = Object.entries(cats)
     .map(([l,d], i) => ({ l, d, c: colors[i % colors.length] }))
     .sort((a,b) => b.d - a.d);
@@ -1237,12 +1186,10 @@ function renderCatChart(txs) {
     }
   });
 
-  // Custom legend with % and amount, sorted by largest
   if (legendEl) {
     const amtColor = typeF === 'income' ? 'var(--accent3)' : 'var(--danger)';
     legendEl.innerHTML = sorted.map(s => {
       const pct = ((s.d / total) * 100).toFixed(1);
-      const barW = pct;
       return `<div style="padding:8px 10px;background:var(--bg3);border-radius:var(--r2);margin-bottom:5px">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px">
           <div style="display:flex;align-items:center;gap:7px">
@@ -1255,7 +1202,7 @@ function renderCatChart(txs) {
           </div>
         </div>
         <div style="background:var(--bg4);border-radius:99px;height:3px">
-          <div style="background:${s.c};border-radius:99px;height:3px;width:${barW}%;transition:width .4s ease"></div>
+          <div style="background:${s.c};border-radius:99px;height:3px;width:${pct}%;transition:width .4s ease"></div>
         </div>
       </div>`;
     }).join('');
@@ -1273,7 +1220,7 @@ function renderCatSummary(txs) {
       <div style="flex:1">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
           <span style="font-size:13px;font-weight:500">${cat}</span>
-          <span style="font-family:var(--mono);font-size:12px;font-weight:700;color:${color}">${color===`var(--accent3)`?'+':'-'}Rp ${fmt(val)}</span>
+          <span style="font-family:var(--mono);font-size:12px;font-weight:700;color:${color}">${color==='var(--accent3)'?'+':'-'}Rp ${fmt(val)}</span>
         </div>
         <div style="background:var(--bg4);border-radius:99px;height:4px">
           <div style="background:${color};border-radius:99px;height:4px;width:${pct}%;transition:width .4s ease"></div>
@@ -1322,6 +1269,8 @@ async function exportXLSX() {
   const wb = new ExcelJS.Workbook();
   wb.creator = 'FINANKU';
   wb.created = new Date();
+
+  // ---- Sheet 1: Transaksi ----
   const ws = wb.addWorksheet('Transaksi');
   ws.columns = [
     { header: 'Tanggal',      key: 'date',   width: 16 },
@@ -1330,39 +1279,59 @@ async function exportXLSX() {
     { header: 'Kategori',     key: 'cat',    width: 18 },
     { header: 'Jumlah (Rp)', key: 'amount', width: 20 },
   ];
-  const thinBlack  = { style: 'thin', color: { argb: 'FF000000' } };
-  const borderAll  = { top: thinBlack, left: thinBlack, bottom: thinBlack, right: thinBlack };
+
+  const thinBlack = { style: 'thin', color: { argb: 'FF000000' } };
+  const borderAll = { top: thinBlack, left: thinBlack, bottom: thinBlack, right: thinBlack };
+  // Blue header matching image: #4472C4
   const headerFill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF4472C4' } };
-  const incFill    = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF70AD47' } };
-  const expFill    = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFF0000' } };
+  // Pemasukan: green bg (#70AD47), Pengeluaran: red bg (#FF0000)
+  const incFill  = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF70AD47' } };
+  const expFill  = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFF0000' } };
+
+  // Header row
   const hdr = ws.getRow(1);
   ['date','type','desc','cat','amount'].forEach((key, idx) => {
     const cell = hdr.getCell(idx + 1);
-    cell.fill   = headerFill;
-    cell.font   = { bold: true, color: { argb: 'FFFFFFFF' }, size: 11, name: 'Calibri' };
+    cell.fill = headerFill;
+    cell.font = { bold: true, color: { argb: 'FFFFFFFF' }, size: 11, name: 'Calibri' };
     cell.border = borderAll;
-    cell.alignment = { vertical: 'middle', horizontal: 'center' };
+    cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: false };
   });
   hdr.height = 20;
-  txs.forEach(t => {
+
+  // Data rows
+  txs.forEach((t) => {
     const isIncome = t.type === 'income';
-    const row = ws.addRow({ date: t.date, type: t.type === 'income' ? 'Pemasukan' : 'Pengeluaran', desc: t.desc, cat: t.cat, amount: t.amount });
+    const row = ws.addRow({
+      date: t.date,
+      type: t.type === 'income' ? 'Pemasukan' : 'Pengeluaran',
+      desc: t.desc,
+      cat: t.cat,
+      amount: t.amount,
+    });
     row.height = 18;
-    row.eachCell(cell => { cell.border = borderAll; cell.font = { name: 'Calibri', size: 11 }; cell.alignment = { vertical: 'middle' }; });
+    row.eachCell(cell => {
+      cell.border = borderAll;
+      cell.font = { name: 'Calibri', size: 11, color: { argb: 'FF000000' } };
+      cell.alignment = { vertical: 'middle' };
+    });
+    // Jenis cell: colored background + white bold text
     const typeCell = row.getCell('type');
-    typeCell.fill  = isIncome ? incFill : expFill;
-    typeCell.font  = { name: 'Calibri', size: 11, bold: true, color: { argb: 'FFFFFFFF' } };
+    typeCell.fill = isIncome ? incFill : expFill;
+    typeCell.font = { name: 'Calibri', size: 11, bold: true, color: { argb: 'FFFFFFFF' } };
     typeCell.alignment = { vertical: 'middle', horizontal: 'center' };
-    const amtCell  = row.getCell('amount');
+    // Amount cell: right-aligned, red color for expense
+    const amtCell = row.getCell('amount');
     amtCell.numFmt = '#,##0';
-    amtCell.font   = { name: 'Calibri', size: 11, bold: true, color: { argb: isIncome ? 'FF70AD47' : 'FFFF0000' } };
+    amtCell.font = { name: 'Calibri', size: 11, bold: true, color: { argb: isIncome ? 'FF70AD47' : 'FFFF0000' } };
     amtCell.alignment = { horizontal: 'right', vertical: 'middle' };
   });
-  const date   = new Date().toISOString().split('T')[0];
+
+  const date = new Date().toISOString().split('T')[0];
   const buffer = await wb.xlsx.writeBuffer();
-  const blob   = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-  const url    = URL.createObjectURL(blob);
-  const a      = document.createElement('a');
+  const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
   a.href = url; a.download = `FINANKU_${currentUser}_${date}.xlsx`; a.click();
   URL.revokeObjectURL(url);
   toast('File Excel berhasil diunduh! 📊');
@@ -1376,49 +1345,95 @@ function exportPDF() {
   const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
   const income  = txs.filter(t=>t.type==='income').reduce((a,t)=>a+t.amount,0);
   const expense = txs.filter(t=>t.type==='expense').reduce((a,t)=>a+t.amount,0);
-  const net     = income - expense;
-  const today   = new Date().toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'});
-  doc.setFillColor(255,255,255); doc.rect(0,0,297,210,'F');
-  doc.setFillColor(76,175,80); doc.rect(0,0,297,24,'F');
-  doc.setTextColor(255,255,255); doc.setFontSize(16); doc.setFont('helvetica','bold');
+  const net = income - expense;
+  const today = new Date().toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'});
+
+  // White background
+  doc.setFillColor(255, 255, 255);
+  doc.rect(0, 0, 297, 210, 'F');
+
+  // Green header bar (matching image: bright green #4CAF50-ish)
+  doc.setFillColor(76, 175, 80);
+  doc.rect(0, 0, 297, 24, 'F');
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(16); doc.setFont('helvetica','bold');
   doc.text('FINANKU — Laporan Keuangan', 148, 11, { align: 'center' });
   doc.setFontSize(9); doc.setFont('helvetica','normal');
   doc.text(`Pengguna: ${currentUser}   |   Diekspor: ${today}`, 148, 18, { align: 'center' });
+
+  // Summary boxes — light background, dark text
   const boxes = [
-    { label: 'Total Pemasukan',  val: 'Rp ' + fmt(income),        lbg:[230,245,235], lfg:[30,100,50] },
-    { label: 'Total Pengeluaran',val: 'Rp ' + fmt(expense),       lbg:[245,230,230], lfg:[150,20,20] },
-    { label: 'Saldo Bersih',     val: 'Rp ' + fmt(Math.abs(net)), lbg:[235,233,255], lfg:[60,50,180] },
-    { label: 'Jml Transaksi',    val: txs.length + ' transaksi',  lbg:[240,237,255], lfg:[80,60,180] },
+    { label: 'Total Pemasukan',  val: 'Rp ' + fmt(income),         bg: [13,61,45],   fg: [52,211,153],  lbg:[230,245,235], lfg:[30,100,50] },
+    { label: 'Total Pengeluaran',val: 'Rp ' + fmt(expense),        bg: [61,13,13],   fg: [220,50,50],   lbg:[245,230,230], lfg:[150,20,20] },
+    { label: 'Saldo Bersih',     val: 'Rp ' + fmt(Math.abs(net)),  bg: [10,15,40],   fg: [108,99,255],  lbg:[235,233,255], lfg:[60,50,180] },
+    { label: 'Jml Transaksi',    val: txs.length + ' transaksi',   bg: [26,29,39],   fg: [130,100,200], lbg:[240,237,255], lfg:[80,60,180] },
   ];
   boxes.forEach((b, i) => {
     const x = 14 + i * 68;
-    doc.setFillColor(...b.lbg); doc.roundedRect(x,28,64,18,2,2,'F');
-    doc.setDrawColor(200,200,200); doc.setLineWidth(0.3); doc.roundedRect(x,28,64,18,2,2,'S');
-    doc.setFontSize(7.5); doc.setFont('helvetica','normal'); doc.setTextColor(100,100,100);
+    // Light box
+    doc.setFillColor(...b.lbg);
+    doc.roundedRect(x, 28, 64, 18, 2, 2, 'F');
+    // Border
+    doc.setDrawColor(200, 200, 200);
+    doc.setLineWidth(0.3);
+    doc.roundedRect(x, 28, 64, 18, 2, 2, 'S');
+    doc.setFontSize(7.5); doc.setFont('helvetica','normal');
+    doc.setTextColor(100, 100, 100);
     doc.text(b.label, x+4, 34);
-    doc.setFontSize(11); doc.setFont('helvetica','bold'); doc.setTextColor(...b.lfg);
+    doc.setFontSize(11); doc.setFont('helvetica','bold');
+    doc.setTextColor(...b.lfg);
     doc.text(b.val, x+4, 42);
   });
-  const rows = txs.map(t => [t.date, t.type==='income'?'Pemasukan':'Pengeluaran', t.desc, t.cat, (t.type==='income'?'+ Rp ':'- Rp ')+fmt(t.amount)]);
+
+  // Table
+  const rows = txs.map(t => [
+    t.date,
+    t.type === 'income' ? 'Pemasukan' : 'Pengeluaran',
+    t.desc,
+    t.cat,
+    (t.type==='income' ? '+ Rp ' : '- Rp ') + fmt(t.amount),
+  ]);
+
   doc.autoTable({
     startY: 52,
-    head: [['Tanggal','Jenis','Keterangan','Kategori','Jumlah (Rp)']],
-    body: rows, theme: 'grid',
-    styles: { fontSize:9, cellPadding:3, textColor:[30,30,30], lineColor:[180,180,180], lineWidth:0.3, font:'helvetica', fillColor:[255,255,255] },
-    headStyles: { fillColor:[70,130,200], textColor:[255,255,255], fontStyle:'bold', fontSize:9, halign:'center' },
-    alternateRowStyles: { fillColor:[240,245,255] },
-    columnStyles: { 0:{cellWidth:26}, 1:{cellWidth:28,halign:'center'}, 2:{cellWidth:90}, 3:{cellWidth:32}, 4:{cellWidth:42,halign:'right'} },
-    didParseCell(data) {
-      if (data.section==='body' && data.column.index===1) { data.cell.styles.textColor = data.cell.raw==='Pemasukan'?[34,139,34]:[200,30,30]; data.cell.styles.fontStyle='bold'; }
-      if (data.section==='body' && data.column.index===4) { data.cell.styles.textColor = data.cell.raw.startsWith('+')?[34,139,34]:[200,30,30]; data.cell.styles.fontStyle='bold'; }
+    head: [['Tanggal', 'Jenis', 'Keterangan', 'Kategori', 'Jumlah (Rp)']],
+    body: rows,
+    theme: 'grid',
+    styles: { fontSize: 9, cellPadding: 3, textColor: [30,30,30], lineColor: [180,180,180], lineWidth: 0.3, font: 'helvetica', fillColor: [255,255,255] },
+    headStyles: { fillColor: [70,130,200], textColor: [255,255,255], fontStyle: 'bold', fontSize: 9, halign: 'center' },
+    alternateRowStyles: { fillColor: [240,245,255] },
+    bodyStyles: { fillColor: [255,255,255], textColor: [30,30,30] },
+    columnStyles: {
+      0: { cellWidth: 26 },
+      1: { cellWidth: 28, halign: 'center' },
+      2: { cellWidth: 90 },
+      3: { cellWidth: 32 },
+      4: { cellWidth: 42, halign: 'right' },
     },
-    margin: { left:14, right:14 },
+    didParseCell(data) {
+      if (data.section === 'body' && data.column.index === 1) {
+        const isInc = data.cell.raw === 'Pemasukan';
+        data.cell.styles.textColor = isInc ? [34,139,34] : [200,30,30];
+        data.cell.styles.fontStyle = 'bold';
+      }
+      if (data.section === 'body' && data.column.index === 4) {
+        const isInc = data.cell.raw.startsWith('+');
+        data.cell.styles.textColor = isInc ? [34,139,34] : [200,30,30];
+        data.cell.styles.fontStyle = 'bold';
+      }
+    },
+    margin: { left: 14, right: 14 },
   });
+
+  // Footer
   const pageCount = doc.internal.getNumberOfPages();
-  for (let i=1; i<=pageCount; i++) {
-    doc.setPage(i); doc.setFontSize(7); doc.setFont('helvetica','normal'); doc.setTextColor(150,150,150);
-    doc.text(`FINANKU · Tersinkron via Firebase · Halaman ${i} dari ${pageCount}`, 148, 205, { align:'center' });
+  for (let i = 1; i <= pageCount; i++) {
+    doc.setPage(i);
+    doc.setFontSize(7); doc.setFont('helvetica','normal');
+    doc.setTextColor(150,150,150);
+    doc.text(`FINANKU · Data tersimpan lokal di perangkat Anda · Halaman ${i} dari ${pageCount}`, 148, 205, { align: 'center' });
   }
+
   const date = new Date().toISOString().split('T')[0];
   doc.save(`FINANKU_${currentUser}_${date}.pdf`);
   toast('PDF berhasil diunduh! 📄');
@@ -1428,11 +1443,16 @@ function exportPDF() {
 const STANDARD_CATS = ['Gaji','Bisnis','Investasi','Makanan','Transport','Belanja','Tagihan','Kesehatan','Hiburan','Lainnya'];
 
 function toggleCustomCat(prefix) {
-  const sel  = document.getElementById(prefix + 'Cat');
+  const sel = document.getElementById(prefix + 'Cat');
   const wrap = document.getElementById(prefix + 'CatCustomWrap');
-  const inp  = document.getElementById(prefix + 'CatCustom');
-  if (sel.value === 'Lainnya') { wrap.style.display = 'block'; inp.focus(); }
-  else { wrap.style.display = 'none'; inp.value = ''; }
+  const inp = document.getElementById(prefix + 'CatCustom');
+  if (sel.value === 'Lainnya') {
+    wrap.style.display = 'block';
+    inp.focus();
+  } else {
+    wrap.style.display = 'none';
+    inp.value = '';
+  }
 }
 
 function getCatValue(prefix) {
@@ -1450,12 +1470,14 @@ let editTypeState = 'income';
 function openEditModal(id) {
   const tx = getTx().find(t => t.id === id);
   if (!tx) return;
-  document.getElementById('editId').value    = id;
-  document.getElementById('editDesc').value  = tx.desc;
+  document.getElementById('editId').value = id;
+  document.getElementById('editDesc').value = tx.desc;
   document.getElementById('editAmount').value = tx.amount;
-  document.getElementById('editDate').value  = tx.date;
-  const catSel      = document.getElementById('editCat');
-  const isStandard  = STANDARD_CATS.includes(tx.cat);
+  document.getElementById('editDate').value = tx.date;
+
+  // Category: check if standard or custom
+  const catSel = document.getElementById('editCat');
+  const isStandard = STANDARD_CATS.includes(tx.cat);
   if (isStandard) {
     catSel.value = tx.cat;
     document.getElementById('editCatCustomWrap').style.display = 'none';
@@ -1465,6 +1487,8 @@ function openEditModal(id) {
     document.getElementById('editCatCustomWrap').style.display = 'block';
     document.getElementById('editCatCustom').value = tx.cat;
   }
+
+  // Type buttons
   setEditType(tx.type);
   document.getElementById('editModal').classList.add('open');
 }
@@ -1484,23 +1508,24 @@ function setEditType(type) {
   }
 }
 
-async function saveEdit() {
-  const id     = parseInt(document.getElementById('editId').value);
-  const desc   = document.getElementById('editDesc').value.trim();
+function saveEdit() {
+  const id = parseInt(document.getElementById('editId').value);
+  const desc = document.getElementById('editDesc').value.trim();
   const amount = parseFloat(document.getElementById('editAmount').value);
-  const cat    = getCatValue('edit');
-  const date   = document.getElementById('editDate').value;
-  const type   = editTypeState;
-  if (!desc)             { toast('Isi keterangan transaksi', true); return; }
+  const cat = getCatValue('edit');
+  const date = document.getElementById('editDate').value;
+  const type = editTypeState;
+  if (!desc) { toast('Isi keterangan transaksi', true); return; }
   if (!amount || amount <= 0) { toast('Jumlah harus lebih dari 0', true); return; }
-  if (!date)             { toast('Pilih tanggal', true); return; }
+  if (!date) { toast('Pilih tanggal', true); return; }
   if (cat === 'Lainnya') { toast('Tulis nama kategori dulu', true); return; }
   const txs = getTx().map(t => t.id === id ? { ...t, type, desc, amount, cat, date } : t);
-  await saveTx(txs);
+  saveTx(txs);
   closeEditModal();
   toast('Transaksi berhasil diperbarui! ✓');
   refreshAll();
   renderTransactions();
+  // Juga update riwayat jika sedang terbuka
   const riwayatTab = document.getElementById('tab-riwayat');
   if (riwayatTab && riwayatTab.style.display !== 'none') renderHistory();
 }
@@ -1520,14 +1545,12 @@ function _renderHistoryPage() {
   const fTo     = document.getElementById('riwayatTo')?.value || '';
   const fSort   = document.getElementById('riwayatSort')?.value || 'newest';
 
-  // Update category dropdown
   const allCats = [...new Set(getTx().map(t => t.cat))].sort();
   const catSel  = document.getElementById('riwayatCat');
   const curCat  = catSel.value;
   catSel.innerHTML = '<option value="all">Semua Kategori</option>' +
     allCats.map(c => `<option value="${c}"${c === curCat ? ' selected' : ''}>${c}</option>`).join('');
 
-  // Apply filters
   if (fType !== 'all') txs = txs.filter(t => t.type === fType);
   if (fCat  !== 'all') txs = txs.filter(t => t.cat === fCat);
   if (fSearch) txs = txs.filter(t =>
@@ -1535,7 +1558,6 @@ function _renderHistoryPage() {
   if (fFrom) txs = txs.filter(t => t.date >= fFrom);
   if (fTo)   txs = txs.filter(t => t.date <= fTo);
 
-  // Apply sorting
   txs = [...txs];
   switch (fSort) {
     case 'oldest':  txs.sort((a,b) => a.date.localeCompare(b.date)); break;
@@ -1545,7 +1567,6 @@ function _renderHistoryPage() {
     default:        txs.sort((a,b) => b.date.localeCompare(a.date) || b.id - a.id);
   }
 
-  // Summary
   const income  = txs.filter(t => t.type === 'income').reduce((a,t) => a + t.amount, 0);
   const expense = txs.filter(t => t.type === 'expense').reduce((a,t) => a + t.amount, 0);
   const net     = income - expense;
@@ -1566,13 +1587,11 @@ function _renderHistoryPage() {
     return;
   }
 
-  // Pagination
   const totalPages = Math.ceil(txs.length / RIWAYAT_PAGE_SIZE);
   if (riwayatPage > totalPages) riwayatPage = totalPages;
   const start   = (riwayatPage - 1) * RIWAYAT_PAGE_SIZE;
   const pageTxs = txs.slice(start, start + RIWAYAT_PAGE_SIZE);
 
-  // Render: grouped by month when sorted by date, flat otherwise
   const sortByDate = fSort === 'newest' || fSort === 'oldest';
   if (sortByDate) {
     const groups = {};
@@ -1601,7 +1620,6 @@ function _renderHistoryPage() {
     el.innerHTML = pageTxs.map(t => historyItemHTML(t)).join('');
   }
 
-  // Pagination controls
   const pg = document.getElementById('riwayatPagination');
   if (totalPages <= 1) { pg.innerHTML = ''; return; }
   const btnStyle = (active) => `padding:6px 12px;background:${active?'var(--accent)':'var(--bg3)'};color:${active?'#fff':'var(--text2)'};border:1px solid ${active?'var(--accent)':'var(--border2)'};border-radius:var(--r2);font-size:13px`;
